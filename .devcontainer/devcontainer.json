@@ -6,6 +6,7 @@
   "shutdownAction": "stopCompose",
   "postCreateCommand": "go mod download && make bootstrap",
   "workspaceFolder": "/workspace",
+  "remoteUser": "vscode",
   // "overrideCommand": "",
   "extensions": [
       "golang.go",
