@@ -21,6 +21,8 @@ RUN npm i -g \
 # Install Go packages
 RUN go get -v \
   github.com/uudashr/gopkgs/v2/cmd/gopkgs
+  
+USER vscode
 
 # Embedded SQLite3 and File-based SQLite3 require CGO. :(
 ENV CGO_ENABLED=1
