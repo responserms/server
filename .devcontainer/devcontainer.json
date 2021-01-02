@@ -1,0 +1,82 @@
+{
+  "name": "response-dev",
+  "dockerComposeFile": ["docker-compose.yml"],
+  "service": "vscode",
+  "runServices": ["vscode"],
+  "shutdownAction": "stopCompose",
+  "postCreateCommand": "go mod download && make bootstrap",
+  "workspaceFolder": "/workspace",
+  // "overrideCommand": "",
+  "extensions": [
+      "golang.go",
+      "eamodio.gitlens", // IDE Git information
+      "davidanson.vscode-markdownlint",
+      "ms-azuretools.vscode-docker", // Docker integration and linting
+      "shardulm94.trailing-spaces", // Show trailing spaces
+      "Gruntfuggly.todo-tree", // Highlights TODO comments
+      "bierner.emojisense", // Emoji sense for markdown
+      "stkb.rewrap", // rewrap comments after n characters on one line
+      "vscode-icons-team.vscode-icons", // Better file extension icons
+      "github.vscode-pull-request-github", // Github interaction
+      "redhat.vscode-yaml", // Kubernetes, Drone syntax highlighting
+      "bajdzis.vscode-database", // Supports connections to mysql or postgres, over SSL, socked
+      "IBM.output-colorizer", // Colorize your output/test logs
+      "ymotongpoo.licenser", // automatic license comments
+      "jasonnutter.vscode-codeowners", // show the person in charge of the file/feature in VSCode
+      "alefragnani.Bookmarks", // Code bookmarks
+      "GraphQL.vscode-graphql" // GraphQL Support
+      // "mohsen1.prettify-json", // Prettify JSON data
+      // "zxh404.vscode-proto3", // Supports Proto syntax
+      // "jrebocho.vscode-random", // Generates random values
+      // "quicktype.quicktype", // Paste JSON as code
+  ],
+  "settings": {
+      "files.eol": "\n",
+      "remote.extensionKind": {
+          "ms-azuretools.vscode-docker": "workspace"
+      },
+      "go.useLanguageServer": true,
+      "go.autocompleteUnimportedPackages": true,
+      "go.gotoSymbol.includeImports": true,
+      "go.gotoSymbol.includeGoroot": true,
+      "gopls": {
+          "usePlaceholders": false
+      },
+      "go.lintTool": "golangci-lint",
+      "go.buildOnSave": "workspace",
+      "go.lintOnSave": "workspace",
+      "go.vetOnSave": "workspace",
+      "editor.formatOnSave": true,
+      "[go]": {
+          "editor.codeActionsOnSave": {
+              "source.organizeImports": true
+          }
+      },
+      "[markdown]": {
+          "editor.wordWrap": "on",
+          "editor.quickSuggestions": false,
+          "editor.codeActionsOnSave": {
+            "source.fixAll.markdownlint": true
+          }
+      },
+      "go.toolsEnvVars": {
+          "GOFLAGS": "-tags=",
+          "CGO_ENABLED": 1 // for the race detector
+      },
+      "gopls.env": {
+          "GOFLAGS": "-tags="
+      },
+      "go.testEnvVars": {},
+      "go.testFlags": ["-v", "-race"],
+      "go.testTimeout": "10s",
+      "go.coverOnSingleTest": true,
+      "go.coverOnSingleTestFile": true,
+
+      // license defaults
+      "licenser.license": "MPLv2",
+      "licenser.projectName": "Response RMS",
+      "licenser.author": "Contaim, LLC",
+      "licenser.useSingleLineStyle": true,
+      "licenser.disableAutoHeaderInsertion": false,
+  }
+}

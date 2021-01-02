@@ -1,0 +1,1 @@
+encryption_key = env("invalid_encryption_key")
