@@ -28,7 +28,7 @@ http {
 
 Response Server by default listens on `0.0.0.0` which means that HTTP services will be bound to all networks. This is done to create a frictionless entrypoint to getting started with Response Server.
 
-We recommend that you limit the networks Response Server listens on when deploying to production, especially in a cloud environment. Set the `bind_address` to a suitable network \(such as your public network\) or use one of our [helpful networking functions](/config/introduction#private_ip) to automatically configure the `bind_address`.
+We recommend that you limit the networks Response Server listens on when deploying to production, especially in a cloud environment. Set the `bind_address` to a suitable network \(such as your public network\) or use one of our [helpful networking functions](https://github.com/responserms/server/tree/e88346b6907fa311fd1c03892fb1196ba3bfba22/config/introduction/README.md#private_ip) to automatically configure the `bind_address`.
 
 ### port
 
@@ -103,7 +103,7 @@ Defining this stanza will enable automatic TLS. You must define all of the requi
 By defining the `http.tls.auto` stanza you accept the Certificate Authority's subscriber agreement. The full text of this agreement [may be obtained here](https://letsencrypt.org/repository/#let-s-encrypt-subscriber-agreement).
 {% endhint %}
 
- Automatic TLS is an awesome feature and we think it's pretty simple to configure if you've used Let's Encrypt before. However, if you have not ~~please see our guide on automatic TLS certificates with Response Server~~ to get started quickly. Don't hesitate to reach out on Discord if you have questions!
+Automatic TLS is an awesome feature and we think it's pretty simple to configure if you've used Let's Encrypt before. However, if you have not ~~please see our guide on automatic TLS certificates with Response Server~~ to get started quickly. Don't hesitate to reach out on Discord if you have questions!
 
 ### production
 
