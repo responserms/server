@@ -28,7 +28,7 @@ http {
 
 Response Server by default listens on `0.0.0.0` which means that HTTP services will be bound to all networks. This is done to create a frictionless entrypoint to getting started with Response Server.
 
-We recommend that you limit the networks Response Server listens on when deploying to production, especially in a cloud environment. Set the `bind_address` to a suitable network \(such as your public network\) or use one of our [helpful networking functions](https://github.com/responserms/server/tree/e88346b6907fa311fd1c03892fb1196ba3bfba22/config/introduction/README.md#private_ip) to automatically configure the `bind_address`.
+We recommend that you limit the networks Response Server listens on when deploying to production, especially in a cloud environment. Set the `bind_address` to a suitable network \(such as your public network\) or use one of our [helpful networking functions](./#private_ip) to automatically configure the `bind_address`.
 
 ### port
 
