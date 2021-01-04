@@ -10,6 +10,7 @@
 * [HTTP](../configuration/http.md)
 * [Database](../configuration/database.md)
 * [Events](../configuration/events.md)
+* [Cluster](../configuration/cluster.md)
 
 ## External Components <a id="components"></a>
 
