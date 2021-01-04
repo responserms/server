@@ -4,7 +4,6 @@
 
 ## Configuration
 
-* [Introduction](configuration/introduction.md)
 * [Attributes](configuration/attributes.md)
 * [HTTP](configuration/http.md)
 
