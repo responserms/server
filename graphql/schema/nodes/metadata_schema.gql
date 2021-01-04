@@ -1,0 +1,6 @@
+type MetadataSchema implements Node {
+  id: ID!
+  name: String!
+  about: String
+  schema: Map!
+}

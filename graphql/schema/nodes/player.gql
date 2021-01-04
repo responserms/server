@@ -1,0 +1,64 @@
+
+type Player implements Node {
+  id: ID!
+  name: String!
+  total_minutes: Int
+  session_started_at: Time
+  session_ended_at: Time
+  last_seen_at: Time
+  metadata: Metadata
+  user: User
+  servers: [Server]
+  identifiers: [PlayerIdentifier!]
+  created_at: Time!
+  updated_at: Time!
+}
+
+enum PlayerOrderField {
+  TOTAL_MINUTES
+  SESSION_STARTED_AT
+  SESSION_ENDED_AT
+  LAST_SEEN_AT
+  CREATED_AT
+  UPDATED_AT
+}
+
+input PlayerFilter {
+  search: String
+  online: Boolean
+}
+
+input PlayerOrder {
+  direction: OrderDirection!
+  field: PlayerOrderField
+}
+
+type PlayerConnection {
+  totalCount: Int!
+  pageInfo: PageInfo!
+  edges: [PlayerEdge]
+}
+
+type PlayerEdge {
+  node: Player
+  cursor: Cursor!
+}
+
+input UpsertPlayerInput {
+  name: String!
+  add_minutes: Int!
+  identifiers: [UpsertPlayerIdentifierInput!]
+}
+
+extend type Query {
+  player(id: ID!): Player
+  players(
+    paginate: PaginationInput!
+    orderBy: PlayerOrder
+    filter: PlayerFilter
+  ): PlayerConnection
+}
+
+extend type Mutation {
+  upsertPlayers(server: ID!, input: [UpsertPlayerInput!]): [Player!]
+}

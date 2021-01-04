@@ -1,0 +1,23 @@
+
+"""
+PageInfo provides information on the current result set from a pagination query.
+"""
+type PageInfo {
+  "Whether another page is available to be requested."
+  hasNextPage: Boolean!
+
+  "Whether there is a page before the recieved page."
+  hasPreviousPage: Boolean!
+
+  "The starting cursor for the current result set."
+  startCursor: Cursor
+
+  "The ending cursor for the current result set."
+  endCursor: Cursor
+}
+
+type Query {
+  node(id: ID!): Node
+  nodes(ids: [ID!]!): [Node]!
+  ping: String!
+}

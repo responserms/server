@@ -7,12 +7,38 @@ func applyDefaults(cfg *Config) *Config {
 	// apply `database` defaults
 	cfg = applyDatabaseDefaults(cfg)
 
+	// apply `cluster` defaults
+	cfg = applyClusterDefaults(cfg)
+
+	// apply `http` defaults
+	cfg = applyHTTPDefaults(cfg)
+
 	return cfg
 }
 
-// func applyClusterDefaults(cfg *Config) *Config {
+func applyClusterDefaults(cfg *Config) *Config {
+	if cfg.Cluster.Environment == "" {
+		cfg.Cluster.Environment = "local"
+	}
 
-// }
+	if cfg.Cluster.BindAddress == "" {
+		cfg.Cluster.BindAddress = "0.0.0.0"
+	}
+
+	if cfg.Cluster.BindPort == 0 {
+		cfg.Cluster.BindPort = 3320
+	}
+
+	if cfg.Cluster.BindMemberAddress == "" {
+		cfg.Cluster.BindMemberAddress = "0.0.0.0"
+	}
+
+	if cfg.Cluster.BindMemberPort == 0 {
+		cfg.Cluster.BindMemberPort = 3322
+	}
+
+	return cfg
+}
 
 func applyEventsDefaults(cfg *Config) *Config {
 	if cfg.Events.Type == "" {
@@ -63,6 +89,22 @@ func applyDatabaseDefaults(cfg *Config) *Config {
 			cfg.Database.Username = "root"
 		}
 	}
+
+	return cfg
+}
+
+func applyHTTPDefaults(cfg *Config) *Config {
+	if cfg.HTTP.BindAddress == "" {
+		cfg.HTTP.BindAddress = "0.0.0.0"
+	}
+
+	if cfg.HTTP.Port == 0 {
+		cfg.HTTP.Port = 8080
+	}
+
+	// if cfg.HTTP.MaxUploadSize == 0 {
+	// 	cfg.HTTP.MaxUploadSize = 10000
+	// }
 
 	return cfg
 }

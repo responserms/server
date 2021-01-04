@@ -32,7 +32,7 @@ type Options struct {
 	Username string
 	Password string
 	Options  map[string]string
-	Logger   log.Logger
+	Logger   log.ComponentLogger
 }
 
 // Database holds the database configuration for the internal ORM. This allows a driver-agnostic way
@@ -51,7 +51,7 @@ type Database struct {
 func Configure(ctx context.Context, options *Options) (*Database, error) {
 	db := &Database{
 		options: options,
-		log:     options.Logger,
+		log:     options.Logger.Component("database"),
 	}
 
 	db.log.Info("configuring database driver", log.Attributes{

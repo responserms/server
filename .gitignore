@@ -25,5 +25,5 @@
 
 # Environment files
 .env
-response-server
+/response-server
 *.hcl

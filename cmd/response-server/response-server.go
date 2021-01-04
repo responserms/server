@@ -71,13 +71,14 @@ func handleCommand(ctx *cli.Context) error {
 
 	svr, err := server.New(cfg)
 	if err != nil {
-		fmt.Println(err.Error())
+		return err
 	}
 
 	svrContext := ctx.Context
 
 	// Start() is not blocking
-	svr.Start(svrContext)
+	errChan := make(chan error, 1)
+	svr.Start(svrContext, errChan)
 
 	sigs := make(chan os.Signal, 1)
 	stop := make(chan bool, 1)
@@ -89,6 +90,15 @@ func handleCommand(ctx *cli.Context) error {
 
 		fmt.Println()
 		fmt.Println(sig)
+
+		stop <- true
+	}()
+
+	go func() {
+		err := <-errChan
+
+		fmt.Println()
+		fmt.Println(err)
 
 		stop <- true
 	}()
@@ -108,6 +118,7 @@ func createDevelopmentConfig() (*config.Config, error) {
 
 func createStandardConfig(path string) (*config.Config, error) {
 	cfg, diags := config.NewFromFile(path)
+
 	if diags.HasErrors() {
 		err := diags.WriteText(os.Stdout, 0, true)
 		if err != nil {

@@ -13,7 +13,7 @@ import (
 	"github.com/responserms/server/internal/events"
 )
 
-func (s *Server) startEventsService(ctx context.Context) error {
+func (s *Server) startEventsService(ctx context.Context, _ chan error) error {
 	e, err := events.New(ctx, &events.Options{
 		Logger:  s.log,
 		Weight:  10,

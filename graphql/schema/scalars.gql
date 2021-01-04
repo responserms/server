@@ -1,0 +1,22 @@
+"""
+The Time scalar value represents a ISO-8601 timestamp with the current time, down to the millisecond in
+the Zulu (UTC+0) timezone. From this you can convert the date to any other timezone, including the user's
+local timezone if necessary.
+"""
+scalar Time
+
+
+"""
+Cursor for node and nodes.
+"""
+scalar Cursor
+
+"""
+Map returns arbitrary JSON.
+"""
+scalar Map
+
+"""
+Any responses vary based on the parameters applied.
+"""
+scalar Any

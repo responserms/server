@@ -1,0 +1,23 @@
+type PlayerIdentifier implements Node {
+  id: ID!
+  type: String!
+  identifier: String!
+  metadata: Metadata
+  player: Player!
+  created_at: Time!
+  updated_at: Time!
+}
+
+input UpsertPlayerIdentifierInput {
+  type: String!
+  identifier: String!
+}
+
+input PlayerIdentifierConstraintInput {
+  type: String!
+  identifier: String!
+}
+
+extend type Query {
+  playerByIdentifiers(input: [PlayerIdentifierConstraintInput!]): Player
+}

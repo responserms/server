@@ -1,0 +1,30 @@
+input FilterSessionToken {
+  is_blocked: Boolean
+  is_expired: Boolean
+}
+
+type SessionTokenConnection {
+  totalCount: Int!
+  pageInfo: PageInfo!
+  edges: [SessionTokenEdge]
+}
+
+type SessionTokenEdge {
+  node: SessionToken
+  cursor: Cursor!
+}
+
+"""
+Represents a token used for sessions, not Personal Access Tokens. Session tokens work similarly but are generated whenever an login happens
+using a user-driven authentication process, such as password authentication or social authentication.
+"""
+type SessionToken implements Node {
+  id: ID!
+  user: User!
+  expired_at: Time!
+  expired: Boolean!
+  blocked_at: Time
+  blocked: Boolean!
+  created_at: Time!
+  updated_at: Time!
+}

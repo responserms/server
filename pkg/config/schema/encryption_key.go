@@ -47,7 +47,7 @@ func (d *encryptionKeyDef) Spec() hcldec.Spec {
 			diag := hcl.Diagnostics{}
 
 			if value.IsNull() {
-				return nil
+				return hcl.Diagnostics{}
 			}
 
 			key, err := base64.StdEncoding.DecodeString(value.AsString())

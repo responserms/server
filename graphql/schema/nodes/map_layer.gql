@@ -1,0 +1,35 @@
+type MapLayer implements Node {
+  id: ID!
+  map_type: MapType!
+  name: String!
+  url_template: String!
+  is_public: Boolean!
+  metadata: Metadata
+  created_at: Time!
+  updated_at: Time!
+}
+
+input CreateMapLayerInput {
+  map_type: ID!
+  name: String!
+  url_template: String!
+  is_public: Boolean! = true
+}
+
+input UpdateMapLayerInput {
+  map_type: ID
+  name: String
+  url_template: String
+  is_public: Boolean
+}
+
+extend type Query {
+  mapLayer(id: ID!): MapLayer
+  mapLayers: [MapLayer!]
+}
+
+extend type Mutation {
+  createMapLayer(input: CreateMapLayerInput!): MapLayer
+  updateMapLayer(id: ID!, input: UpdateMapLayerInput!): MapLayer
+  deleteMapLayer(id: ID!): Boolean!
+}

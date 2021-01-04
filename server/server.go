@@ -1,15 +1,18 @@
 package server
 
 import (
-	"fmt"
+	"errors"
 	"sync"
 
+	"github.com/responserms/server/internal/cluster"
+	"github.com/responserms/server/internal/database"
 	"github.com/responserms/server/internal/events"
 	"github.com/responserms/server/internal/http"
 	"github.com/responserms/server/internal/log"
 	"github.com/responserms/server/pkg/config"
 )
 
+// Server is the Response Server application.
 type Server struct {
 	once sync.Once
 
@@ -17,6 +20,10 @@ type Server struct {
 	log  log.Logger
 	cfg  *config.Config
 	http *http.Server
+	db   *database.Database
+
+	// cluster store and member manager
+	cluster cluster.Cluster
 
 	// services
 	events events.PubSub
@@ -27,10 +34,12 @@ type Server struct {
 func New(cfg *config.Config) (*Server, error) {
 	server := &Server{}
 
-	fmt.Println(cfg.Developer.Profiling)
-
 	// Assign the config to the Server.
 	server.cfg = cfg
+
+	if server.cfg.EncryptionKey == "" {
+		return nil, errors.New("encryption key is not set")
+	}
 
 	// create the logger with the configured log level
 	logger, err := log.New(log.WithLogLevel(server.cfg.LogLevel))

@@ -1,0 +1,72 @@
+"""
+A User is the foundational component of Response as every person who logs in must have a User record. The User contains the most related
+items and is the basis for which all other relationships are formed.
+"""
+type User implements Node {
+  id: ID!
+  name: String!
+  email: String!
+  system: Boolean!
+  enabled: Boolean!
+  activated: Boolean!
+  disabled_at: Time
+  disabled_reason: String
+  created_at: Time!
+  updated_at: Time!
+
+  metadata: Metadata
+  session_tokens(paginate: PaginationInput, filter: FilterSessionToken): SessionTokenConnection
+    @goField(forceResolver: true)
+}
+
+enum UserOrderField {
+  CREATED_AT
+  UPDATED_AT
+}
+
+input UserFilter {
+  name: String
+  name_like: String
+  email: String
+  email_like: String
+  activated: Boolean
+  disabled: Boolean
+}
+
+input UserOrder {
+  direction: OrderDirection!
+  field: UserOrderField
+}
+
+type UserConnection {
+  totalCount: Int!
+  pageInfo: PageInfo!
+  edges: [UserEdge]
+}
+
+type UserEdge {
+  node: User
+  cursor: Cursor!
+}
+
+extend type Query {
+  """
+  Request the authenticated user.
+  """
+  me: User
+    @isAuthenticated
+
+  """
+  Find a User by their ID.
+  """
+  user(id: ID!): User
+
+  """
+  Filter a paginated list of Users.
+  """
+  users(
+    paginate: PaginationInput!
+    orderBy: UserOrder
+    filter: UserFilter
+  ): UserConnection
+}

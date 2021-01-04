@@ -1,0 +1,24 @@
+"""
+All pagination in the API should use a cursor. This input is the same for every API
+and allows the user to request records before and/or after a specific cursor (ID).
+
+By default the pagination limit is 25 and any other limit, as long as it is within
+the maximum that the administrator configures, can be requested by setting `limit`
+to the appropriate number of records to return in each response.
+
+Cursor-based pagination is sometimes more difficult to grasp than page-based
+pagination, however, it works better with continuous scrolling and when data is
+constantly changing. This is because cursors do not require that the data returned
+be static and no items will be skipped if they fall behind/ahead of the threshold
+before the next request.
+
+Note that although IDs returned from the API are string-based, they map back into
+numeric IDs in the database so all cursors use the actual identifier itself rather
+than the timestamp of the record referred to.
+"""
+input PaginationInput {
+  after: Cursor
+  first: Int = 25
+  before: Cursor
+  last: Int
+}

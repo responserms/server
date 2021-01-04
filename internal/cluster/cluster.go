@@ -7,35 +7,95 @@
 package cluster
 
 import (
+	"context"
+	"fmt"
+	"regexp"
 	"time"
 
 	"github.com/buraksezer/olric"
+	"github.com/responserms/server/internal/log"
 )
 
-type StoreEntry struct {
-	Key       string
-	Value     []byte
-	TTL       int64
-	Timestamp int64
+// Cluster is implemented by services offering clustering.
+type Cluster interface {
+	// NewStore creates a new distributed key/value store.
+	NewStore(name string) (Storer, error)
+
+	// NewLockStore creates a new distributed lock store.
+	NewLockStore(name string) (Locker, error)
+
+	// Start starts the cluster service.
+	Start() error
+
+	// Shutdown shuts down the cluster service.
+	Shutdown(ctx context.Context) error
 }
 
-type Storer interface {
-	Put(key string, val []byte) error
-	PutWithTTL(key string, val []byte, ttl time.Duration)
-	Get(key string) ([]byte, error)
-	GetEntry(key string) (*StoreEntry, error)
-	UpdateTTL(key string, newTTL time.Duration) error
-	Delete(key string)
-}
+var (
+	logExp        = regexp.MustCompile(`^(2.*\s)(\[.*\])`)
+	logEmptyBytes = []byte{}
+)
 
-type Locker interface {
-	Lock(key string) error
+type logWriter struct{}
+
+func (l logWriter) Write(bytes []byte) (int, error) {
+	log := logExp.FindAllSubmatch(bytes, -1)
+	msg := logExp.ReplaceAll(bytes, logExp.Find(logEmptyBytes))
+
+	for i := range log {
+		return fmt.Printf(
+			"%s %s  server.cluster:%s",
+			time.Now().Format("2006-01-02T15:04:05.999-0700"),
+			log[i][2],
+			msg,
+		)
+	}
+
+	return 0, nil
 }
 
 type cluster struct {
 	impl *olric.Olric
 }
 
-func New() (*cluster, error) {
-	return nil, nil
+// New creates a new service implementing the Cluster interface.
+func New(log log.ComponentLogger, options *Options) (Cluster, error) {
+	err := options.init()
+	if err != nil {
+		return nil, fmt.Errorf("new cluster config: %w", err)
+	}
+
+	logger := log.Component("cluster").StandardLogger()
+	logger.SetFlags(0)
+	logger.SetOutput(logWriter{})
+
+	options.olric.LogOutput = logWriter{}
+
+	impl, err := olric.New(options.olric)
+	if err != nil {
+		return nil, fmt.Errorf("new: %s", err)
+	}
+
+	return &cluster{
+		impl: impl,
+	}, nil
 }
+
+func (c *cluster) Start() error {
+	return c.impl.Start()
+}
+
+func (c *cluster) Shutdown(ctx context.Context) error {
+	return c.impl.Shutdown(ctx)
+}
+
+// func (c *cluster) Members() {
+// 	stats, err := c.impl.Stats()
+// 	if err != nil {
+// 		return nil, fmt.Errorf("stats: %w", err)
+// 	}
+
+// 	c.impl.
+
+// 	stats.
+// }

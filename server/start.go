@@ -8,49 +8,50 @@ package server
 
 import (
 	"context"
-	"os"
+	"fmt"
 
 	"github.com/responserms/server/internal/log"
 )
 
-type startupFunc func(ctx context.Context) error
+type startupFunc func(ctx context.Context, errChan chan error) error
 
 // Start performs the startup sequence in the correct order for all internal services
 // used by Response Server. This should be called only once.
 //
 // When the application is ready to shutdown call Shutdown(ctx) with the same context
 // passed into the startup.
-func (s *Server) Start(ctx context.Context) {
-	s.start(ctx)
+func (s *Server) Start(ctx context.Context, errChan chan error) {
+	s.start(ctx, errChan)
 }
 
 // start performs the actual startup sequence.
-func (s *Server) start(ctx context.Context) {
+func (s *Server) start(ctx context.Context, errChan chan error) {
 	var startupSequence = map[string]startupFunc{
-		"events": s.startEventsService,
-		"http":   s.startHTTPService,
+		"events":   s.startEventsService,
+		"cluster":  s.startClusterService,
+		"database": s.startDatabaseService,
+		"http":     s.startHTTPService,
+	}
+
+	var startupOrder = []string{
+		"database",
+		"events",
+		"cluster",
+		"http",
 	}
 
 	// startup should happen only once
 	s.once.Do(func() {
 		s.log.Info("starting")
 
-		for name, start := range startupSequence {
+		for _, name := range startupOrder {
 			s.log.Info("starting service", log.Attributes{
 				"service": name,
 			})
 
-			if err := start(ctx); err != nil {
-				s.log.Error("starting service failed", log.Attributes{
-					"service": name,
-					"error":   err.Error(),
-				})
-
-				s.log.Info("startup sequence exited", log.Attributes{
-					"service": name,
-				})
-
-				os.Exit(1)
+			if err := startupSequence[name](ctx, errChan); err != nil {
+				errChan <- fmt.Errorf("startup failed for %s: %w", name, err)
+				break
 			}
 		}
 	})

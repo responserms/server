@@ -1,0 +1,45 @@
+type MapType implements Node {
+  id: ID!
+  name: String!
+  min_zoom: Int!
+  max_zoom: Int!
+  min_x: Float!
+  min_y: Float!
+  max_x: Float!
+  max_y: Float!
+  metadata: Metadata
+  created_at: Time!
+  updated_at: Time!
+  map_layers: [MapLayer!]
+}
+
+input CreateMapTypeInput {
+  name: String!
+  min_zoom: Int!
+  max_zoom: Int!
+  min_x: Float!
+  min_y: Float!
+  max_x: Float!
+  max_y: Float!
+}
+
+input UpdateMapTypeInput {
+  name: String
+  min_zoom: Int
+  max_zoom: Int
+  min_x: Float
+  min_y: Float
+  max_x: Float
+  max_y: Float
+}
+
+extend type Query {
+  mapType(id: ID!): MapType
+  mapTypes: [MapType!]
+}
+
+extend type Mutation {
+  createMapType(input: CreateMapTypeInput!): MapType
+  updateMapType(id: ID!, input: UpdateMapTypeInput!): MapType
+  deleteMapType(id: ID!): Boolean!
+}

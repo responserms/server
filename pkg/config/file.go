@@ -14,6 +14,11 @@ func NewFromFile(path string) (*Config, *spec.Diagnostics) {
 		return nil, diags
 	}
 
+	// validate the file
+	if diags := s.Parse(ctx); diags.HasErrors() {
+		return nil, diags
+	}
+
 	// empty config struct
 	cfg := newEmptyConfig()
 

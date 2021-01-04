@@ -1,0 +1,12 @@
+type ServerType implements Node {
+  id: ID!
+  key: String!
+  name: String!
+  description: String
+}
+
+extend type Query {
+  serverType(id: ID!): ServerType
+  serverTypeByKey(key: String!): ServerType
+  serverTypes: [ServerType!]
+}

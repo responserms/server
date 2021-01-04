@@ -36,6 +36,10 @@ func DeveloperDefinition() parser.NamedBlockDefinition {
 	return &developerDef{}
 }
 
+func ClusterDefinition() parser.NamedBlockDefinition {
+	return &clusterDef{}
+}
+
 // Schema defines the blocks and their respecify BlockDefinition by creating
 // an instance of parser.BlockDefinitions.
 func Schema() parser.NamedBlockDefinitions {
@@ -61,5 +65,8 @@ func Schema() parser.NamedBlockDefinitions {
 
 		// developer block
 		DeveloperDefinition(),
+
+		// cluster block
+		ClusterDefinition(),
 	}
 }

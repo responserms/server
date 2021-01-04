@@ -1,0 +1,64 @@
+"""
+Login using the provided credentials.
+"""
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+"""
+Returned when performing a `login` mutation. An access_token will be returned only when `logged_in` is true and no
+errors are present. If `require_mfa` returns true a secondary request to `loginMfa` is required to retrieve the
+access_token.
+"""
+type LoginResult {
+  logged_in: Boolean!
+  require_mfa: Boolean!
+  access_token: String
+  user: User
+}
+
+
+"""
+Register a User using the provided creentials and name.
+"""
+input RegisterInput {
+  name: String!
+  email: String!
+  password: String!
+}
+
+"""
+Returned when performing `register` mutation. An access_token will be returned when `registered` is true, no
+errors are present, and `pending` is false. If `pending` returns true the user must wait to be approved before
+being able to login to Response.
+
+The user may subscribe to the `userActivated` subscription with the ID returned in the `user` object to be
+notified when the account is activated. 
+"""
+type RegisterResult {
+  access_token: String
+  registered: Boolean!
+  activated: Boolean!
+  user: User
+}
+
+extend type Mutation {
+  """
+  Login a User using the provided credentials.
+  """
+  login(input: LoginInput!): LoginResult!
+
+  """
+  Register a User using the provided information and credentials.
+  """
+  register(
+    input: RegisterInput!
+  ): RegisterResult!
+
+  """
+  Activates a User that is not already activated. Returns true if the user was activated successfully and
+  false if the user activation failed or the user was already activated.
+  """
+  activateUser(userId: ID!, comments: String): User!
+}

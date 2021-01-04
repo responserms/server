@@ -1,0 +1,32 @@
+type Metadata implements Node {
+  id: ID!
+
+  "The schema used for validating the metadata."
+  schema: MetadataSchema
+
+  """
+  The custom metadata. This will returns an object if not filtered and will return an array
+  of items (types varying based on filter) when filtered.
+  """
+  data(filter: String): Any
+    @goField(forceResolver: true)
+}
+
+type MetadataValidationError {
+  path: String
+  invalidValue: Any
+  message: String!
+}
+
+type MetadataValidationStatus {
+  valid: Boolean!
+  errors: [MetadataValidationError!]
+}
+
+extend type Query {
+  metadata(entityId: ID!): Metadata
+}
+
+extend type Mutation {
+  applyMetadata(entityId: ID!, data: Any!): MetadataValidationStatus
+}

@@ -1,0 +1,18 @@
+"""
+When requesting data from the API, it's often faster to request that the API return the
+data sorted in the order you need it sorted. This allows the client to work with the data
+immediately upon retrieval.
+
+Two order directions are applicable for retrieving data from the API:
+  - ASC: Ascending (e.g. 1-100)
+  - DESC: Descending (e.g. 100-1)
+
+These orders may be applied to any query where `orderBy` is allowed. Each query that supports
+`orderBy` will document its own list of columns by which you can sort. These are named in the
+format of `[Node]Order`, for example on the `User` resource the enum is named
+`UserOrder`.
+"""
+enum OrderDirection {
+  ASC
+  DESC
+}

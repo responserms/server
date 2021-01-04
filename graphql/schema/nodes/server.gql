@@ -1,0 +1,67 @@
+type Server implements Node {
+  id: ID!
+  server_type: ServerType!
+  map_type: MapType!
+  name: String!
+  api_username: String
+  api_port: String
+  api_address: String
+  metadata: Metadata!
+  created_at: Time!
+  updated_at: Time!
+}
+
+enum ServerOrderField {
+  CREATED_AT
+  UPDATED_AT
+}
+
+input ServerOrder {
+  direction: OrderDirection!
+  field: ServerOrderField
+}
+
+type ServerConnection {
+  totalCount: Int!
+  pageInfo: PageInfo!
+  edges: [ServerEdge]
+}
+
+type ServerEdge {
+  node: Server
+  cursor: Cursor!
+}
+
+extend type Query {
+  server(id: ID!): Server
+  servers(
+    paginate: PaginationInput!
+    orderBy: ServerOrder
+  ): ServerConnection
+}
+
+input CreateServerInput {
+  server_type: ID!
+  map_type: ID!
+  name: String!
+  api_username: String
+  api_port: String
+  api_address: String
+  api_secret: String
+}
+
+input UpdateServerInput {
+  server_type: ID
+  map_type: ID
+  name: String
+  api_username: String
+  api_port: String
+  api_address: String
+  api_secret: String
+}
+
+extend type Mutation {
+  createServer(input: CreateServerInput!): Server
+  updateServer(id: ID!, input: UpdateServerInput!): Server
+  deleteServer(id: ID!): Boolean!
+}
