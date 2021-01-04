@@ -7,7 +7,7 @@ description: Configure Response Server's HTTP server.
 Response Server's primary role is providing HTTP-based services. Because of this, HTTP configuration is a key part of properly tweaking Response Server. This page covers all of the available configuration options for tuning Response Server's HTTP and TLS options.
 
 {% hint style="warning" %}
-TLS encryption is strongly recommended in production. Response Server can automatically obtain and renew TLS certificates via Let's Encrypt for you, read more about this in the [http.tls](http.md#http-tls) section.
+TLS encryption is strongly recommended in production. Response Server can automatically obtain and renew TLS certificates via Let's Encrypt for you, read more about this in the [http.tls.auto](http.md#http-tls-auto) section.
 {% endhint %}
 
 ## http
@@ -28,7 +28,7 @@ http {
 
 Response Server by default listens on `0.0.0.0` which means that HTTP services will be bound to all networks. This is done to create a frictionless entrypoint to getting started with Response Server.
 
-We recommend that you limit the networks Response Server listens on when deploying to production, especially in a cloud environment. Set the `bind_address` to a suitable network \(such as your public network\) or use one of our [helpful networking functions](./#private_ip) to automatically configure the `bind_address`.
+We recommend that you limit the networks Response Server listens on when deploying to production, especially in a cloud environment. Set the `bind_address` to a suitable network \(such as your public network\) or use one of our [helpful networking functions](/config/introduction#private_ip) to automatically configure the `bind_address`.
 
 ### port
 
@@ -103,7 +103,7 @@ Defining this stanza will enable automatic TLS. You must define all of the requi
 By defining the `http.tls.auto` stanza you accept the Certificate Authority's subscriber agreement. The full text of this agreement [may be obtained here](https://letsencrypt.org/repository/#let-s-encrypt-subscriber-agreement).
 {% endhint %}
 
-Automatic TLS is an awesome feature and we think it's pretty simple to configure if you've used Let's Encrypt before. However, if you have not ~~please see our guide on automatic TLS certificates with Response Server~~ to get started quickly. Don't hesitate to reach out on Discord if you have questions!
+ Automatic TLS is an awesome feature and we think it's pretty simple to configure if you've used Let's Encrypt before. However, if you have not ~~please see our guide on automatic TLS certificates with Response Server~~ to get started quickly. Don't hesitate to reach out on Discord if you have questions!
 
 ### production
 
@@ -114,7 +114,7 @@ Response Server defaults to using the Let's Encrypt staging endpoint to prevent 
 We do not recommend enabling `production` until you have successfully obtained TLS certificates through the staging endpoint. Once you have done so, setting this to true will enable the production endpoint and re-generate certificates using the production Certificate Authority.
 
 {% hint style="info" %}
-If `production` is not set to true your web browser will alert you that the certificates cannot be trusted and that your connection may not be encrypted. This is expected behavior and will be resolved once you set `production` to true, your connection is still encrypted.
+If `production` is not set to true your web browser will alert you that the certificates cannot be trusted and that your connection may not be encrypted. Don't worry, your connection is still encrypted. The browser warning is expected behavior and will be resolved once you set`http.tls.auto.production` to `true` and relaunch Response Server.
 {% endhint %}
 
 ### email
