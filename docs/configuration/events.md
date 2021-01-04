@@ -71,7 +71,7 @@ Setting `subject` changes the NATS subject used for all Response Server events. 
 `url` `(string: "nats://localhost:4222")`
 
 {% hint style="info" %}
- Applies to the `nats` implementation only.
+Applies to the `nats` implementation only.
 {% endhint %}
 
 The `url` property must be set when using a NATS Server that cannot be connected to using the default connection URL. Response Server will, by default, attempt to connect to a NATS Server using the connection URL of `nats://localhost:4222`.
