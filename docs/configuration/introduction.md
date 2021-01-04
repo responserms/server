@@ -2,7 +2,7 @@
 description: A brief introduction to configuring Response Server with HCL or JSON files.
 ---
 
-# Configuration
+# Introduction
 
 Response Server is configured using one or more files. The format of the files is [HCL](https://github.com/hashicorp/hcl/blob/hcl2/hclsyntax/spec.md) or [JSON](https://github.com/hashicorp/hcl/blob/hcl2/json/spec.md).
 
@@ -39,7 +39,7 @@ To combine multiple config files simply start Response Server with the `--config
 This example shows declaring the `http` and `database` blocks in separate files.
 
 {% tabs %}
-{% tab title="database" %}
+{% tab title="http" %}
 {% code title="config/http.hcl" %}
 ```text
 http {
@@ -67,7 +67,7 @@ http {
 {% endcode %}
 {% endtab %}
 
-{% tab title="http" %}
+{% tab title="database" %}
 {% code title="config/http.hcl" %}
 ```text
 database {

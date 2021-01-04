@@ -1,8 +1,17 @@
 # Table of contents
 
 * [Welcome](README.md)
-* [Configuration](../configuration/README.md)
-  * [Attributes](../configuration/attributes.md)
-  * [HTTP](../configuration/http.md)
-* [Table of contents](../summary.md)
+* [Download](../download.md)
+
+## Configuration
+
+* [Introduction](../configuration/introduction.md)
+* [Attributes](../configuration/attributes.md)
+* [HTTP](../configuration/http.md)
+* [Database](../configuration/database.md)
+* [Events](../configuration/events.md)
+
+## External Components <a id="components"></a>
+
+* [Message Bus](../components/message-bus.md)
 

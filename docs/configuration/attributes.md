@@ -16,7 +16,7 @@ You can use the `response-server` executable to generate a suitable encryption k
 response-server --generate-key
 ```
 
-Response Server will not start and will instead print a suitable encryption key and exit. Provide the returned encryption key in your configuration file or use the [env function](./#env) as you see fit.
+Response Server will not start and will instead print a suitable encryption key and exit. Provide the returned encryption key in your configuration file or use the [env function](/config/introduction#env) as you see fit.
 
 ### encryption\_key
 

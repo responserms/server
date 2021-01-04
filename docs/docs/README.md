@@ -16,7 +16,7 @@ Response Server is the primary component of the Response RMS project and is resp
 
 ## Platforms
 
-Response Server is capable of running on Linux, macOS, and Windows. You can find the binaries for each platform on the [Releases page](https://github.com/responserms/server/tree/e88346b6907fa311fd1c03892fb1196ba3bfba22/releases/README.md).
+Response Server is capable of running on Linux, macOS, and Windows. You can find the binaries for each platform on the [Download page](../download.md).
 
 ## License
 
