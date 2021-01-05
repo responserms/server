@@ -33,7 +33,7 @@ The environments are explained in detail below.
 The `local` environment configures Response Server's connectivity and syncing settings for local loopback connections where all instances are on the same physical or virtual machine where each instance will have the same IP address.
 
 ```text
-events {
+cluster {
   environment = "local"
 }
 ```
@@ -43,7 +43,7 @@ events {
 The `lan` environment configures Response Server to work well across the local area network. This prioritizes higher convergence over less bandwidth usage as bandwidth is typically not an issue when dealing with a local network.
 
 ```text
-events {
+cluster {
   environment = "lan"
 }
 ```
@@ -53,7 +53,7 @@ events {
 The `wan` environment configures Response Server to work well across a wide area network. This prioritizes bandwidth consumption but maintains high consistency.
 
 ```text
-events {
+cluster {
   environment = "wan"
 }
 ```
