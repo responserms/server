@@ -22,8 +22,6 @@ type Tx struct {
 	MapType *MapTypeClient
 	// Metadata is the client for interacting with the Metadata builders.
 	Metadata *MetadataClient
-	// MetadataSchema is the client for interacting with the MetadataSchema builders.
-	MetadataSchema *MetadataSchemaClient
 	// Player is the client for interacting with the Player builders.
 	Player *PlayerClient
 	// PlayerIdentifier is the client for interacting with the PlayerIdentifier builders.
@@ -32,8 +30,10 @@ type Tx struct {
 	Server *ServerClient
 	// ServerType is the client for interacting with the ServerType builders.
 	ServerType *ServerTypeClient
-	// SessionToken is the client for interacting with the SessionToken builders.
-	SessionToken *SessionTokenClient
+	// Session is the client for interacting with the Session builders.
+	Session *SessionClient
+	// Token is the client for interacting with the Token builders.
+	Token *TokenClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 
@@ -176,12 +176,12 @@ func (tx *Tx) init() {
 	tx.MapLayer = NewMapLayerClient(tx.config)
 	tx.MapType = NewMapTypeClient(tx.config)
 	tx.Metadata = NewMetadataClient(tx.config)
-	tx.MetadataSchema = NewMetadataSchemaClient(tx.config)
 	tx.Player = NewPlayerClient(tx.config)
 	tx.PlayerIdentifier = NewPlayerIdentifierClient(tx.config)
 	tx.Server = NewServerClient(tx.config)
 	tx.ServerType = NewServerTypeClient(tx.config)
-	tx.SessionToken = NewSessionTokenClient(tx.config)
+	tx.Session = NewSessionClient(tx.config)
+	tx.Token = NewTokenClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 }
 

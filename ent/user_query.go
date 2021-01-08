@@ -16,7 +16,7 @@ import (
 	"github.com/responserms/server/ent/metadata"
 	"github.com/responserms/server/ent/player"
 	"github.com/responserms/server/ent/predicate"
-	"github.com/responserms/server/ent/sessiontoken"
+	"github.com/responserms/server/ent/session"
 	"github.com/responserms/server/ent/user"
 )
 
@@ -29,12 +29,12 @@ type UserQuery struct {
 	fields     []string
 	predicates []predicate.User
 	// eager-loading edges.
-	withMetadata      *MetadataQuery
-	withSessionTokens *SessionTokenQuery
-	withActivation    *ActivationQuery
-	withActivations   *ActivationQuery
-	withPlayers       *PlayerQuery
-	withFKs           bool
+	withMetadata    *MetadataQuery
+	withSessions    *SessionQuery
+	withActivation  *ActivationQuery
+	withActivations *ActivationQuery
+	withPlayers     *PlayerQuery
+	withFKs         bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -86,9 +86,9 @@ func (uq *UserQuery) QueryMetadata() *MetadataQuery {
 	return query
 }
 
-// QuerySessionTokens chains the current query on the session_tokens edge.
-func (uq *UserQuery) QuerySessionTokens() *SessionTokenQuery {
-	query := &SessionTokenQuery{config: uq.config}
+// QuerySessions chains the current query on the sessions edge.
+func (uq *UserQuery) QuerySessions() *SessionQuery {
+	query := &SessionQuery{config: uq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := uq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -99,8 +99,8 @@ func (uq *UserQuery) QuerySessionTokens() *SessionTokenQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, selector),
-			sqlgraph.To(sessiontoken.Table, sessiontoken.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, user.SessionTokensTable, user.SessionTokensColumn),
+			sqlgraph.To(session.Table, session.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.SessionsTable, user.SessionsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -344,16 +344,16 @@ func (uq *UserQuery) Clone() *UserQuery {
 		return nil
 	}
 	return &UserQuery{
-		config:            uq.config,
-		limit:             uq.limit,
-		offset:            uq.offset,
-		order:             append([]OrderFunc{}, uq.order...),
-		predicates:        append([]predicate.User{}, uq.predicates...),
-		withMetadata:      uq.withMetadata.Clone(),
-		withSessionTokens: uq.withSessionTokens.Clone(),
-		withActivation:    uq.withActivation.Clone(),
-		withActivations:   uq.withActivations.Clone(),
-		withPlayers:       uq.withPlayers.Clone(),
+		config:          uq.config,
+		limit:           uq.limit,
+		offset:          uq.offset,
+		order:           append([]OrderFunc{}, uq.order...),
+		predicates:      append([]predicate.User{}, uq.predicates...),
+		withMetadata:    uq.withMetadata.Clone(),
+		withSessions:    uq.withSessions.Clone(),
+		withActivation:  uq.withActivation.Clone(),
+		withActivations: uq.withActivations.Clone(),
+		withPlayers:     uq.withPlayers.Clone(),
 		// clone intermediate query.
 		sql:  uq.sql.Clone(),
 		path: uq.path,
@@ -371,14 +371,14 @@ func (uq *UserQuery) WithMetadata(opts ...func(*MetadataQuery)) *UserQuery {
 	return uq
 }
 
-//  WithSessionTokens tells the query-builder to eager-loads the nodes that are connected to
-// the "session_tokens" edge. The optional arguments used to configure the query builder of the edge.
-func (uq *UserQuery) WithSessionTokens(opts ...func(*SessionTokenQuery)) *UserQuery {
-	query := &SessionTokenQuery{config: uq.config}
+//  WithSessions tells the query-builder to eager-loads the nodes that are connected to
+// the "sessions" edge. The optional arguments used to configure the query builder of the edge.
+func (uq *UserQuery) WithSessions(opts ...func(*SessionQuery)) *UserQuery {
+	query := &SessionQuery{config: uq.config}
 	for _, opt := range opts {
 		opt(query)
 	}
-	uq.withSessionTokens = query
+	uq.withSessions = query
 	return uq
 }
 
@@ -482,7 +482,7 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 		_spec       = uq.querySpec()
 		loadedTypes = [5]bool{
 			uq.withMetadata != nil,
-			uq.withSessionTokens != nil,
+			uq.withSessions != nil,
 			uq.withActivation != nil,
 			uq.withActivations != nil,
 			uq.withPlayers != nil,
@@ -542,32 +542,32 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 		}
 	}
 
-	if query := uq.withSessionTokens; query != nil {
+	if query := uq.withSessions; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
 		nodeids := make(map[int]*User)
 		for i := range nodes {
 			fks = append(fks, nodes[i].ID)
 			nodeids[nodes[i].ID] = nodes[i]
-			nodes[i].Edges.SessionTokens = []*SessionToken{}
+			nodes[i].Edges.Sessions = []*Session{}
 		}
 		query.withFKs = true
-		query.Where(predicate.SessionToken(func(s *sql.Selector) {
-			s.Where(sql.InValues(user.SessionTokensColumn, fks...))
+		query.Where(predicate.Session(func(s *sql.Selector) {
+			s.Where(sql.InValues(user.SessionsColumn, fks...))
 		}))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.user_session_tokens
+			fk := n.user_sessions
 			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "user_session_tokens" is nil for node %v`, n.ID)
+				return nil, fmt.Errorf(`foreign-key "user_sessions" is nil for node %v`, n.ID)
 			}
 			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "user_session_tokens" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "user_sessions" returned %v for node %v`, *fk, n.ID)
 			}
-			node.Edges.SessionTokens = append(node.Edges.SessionTokens, n)
+			node.Edges.Sessions = append(node.Edges.Sessions, n)
 		}
 	}
 

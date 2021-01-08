@@ -27,7 +27,7 @@ func NewFromFile(path string) (*Config, *spec.Diagnostics) {
 	}
 
 	// apply defaults
-	cfg = applyDefaults(cfg)
+	// cfg = applyDefaults(cfg)
 
 	return cfg, &spec.Diagnostics{}
 }

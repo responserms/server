@@ -10,7 +10,6 @@ import (
 	"github.com/facebook/ent/dialect/sql"
 	"github.com/responserms/server/ent/maptype"
 	"github.com/responserms/server/ent/metadata"
-	"github.com/responserms/server/ent/metadataschema"
 	"github.com/responserms/server/ent/user"
 )
 
@@ -25,41 +24,24 @@ type Metadata struct {
 	// The values are being populated by the MetadataQuery when eager-loading is set.
 	Edges             MetadataEdges `json:"edges"`
 	map_type_metadata *int
-	metadata_schema   *int
 	user_metadata     *int
 }
 
 // MetadataEdges holds the relations/edges for other nodes in the graph.
 type MetadataEdges struct {
-	// Schema holds the value of the schema edge.
-	Schema *MetadataSchema
 	// User holds the value of the user edge.
 	User *User
 	// MapType holds the value of the map_type edge.
 	MapType *MapType
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
-}
-
-// SchemaOrErr returns the Schema value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e MetadataEdges) SchemaOrErr() (*MetadataSchema, error) {
-	if e.loadedTypes[0] {
-		if e.Schema == nil {
-			// The edge schema was loaded in eager-loading,
-			// but was not found.
-			return nil, &NotFoundError{label: metadataschema.Label}
-		}
-		return e.Schema, nil
-	}
-	return nil, &NotLoadedError{edge: "schema"}
+	loadedTypes [2]bool
 }
 
 // UserOrErr returns the User value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e MetadataEdges) UserOrErr() (*User, error) {
-	if e.loadedTypes[1] {
+	if e.loadedTypes[0] {
 		if e.User == nil {
 			// The edge user was loaded in eager-loading,
 			// but was not found.
@@ -73,7 +55,7 @@ func (e MetadataEdges) UserOrErr() (*User, error) {
 // MapTypeOrErr returns the MapType value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e MetadataEdges) MapTypeOrErr() (*MapType, error) {
-	if e.loadedTypes[2] {
+	if e.loadedTypes[1] {
 		if e.MapType == nil {
 			// The edge map_type was loaded in eager-loading,
 			// but was not found.
@@ -95,9 +77,7 @@ func (*Metadata) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = &sql.NullInt64{}
 		case metadata.ForeignKeys[0]: // map_type_metadata
 			values[i] = &sql.NullInt64{}
-		case metadata.ForeignKeys[1]: // metadata_schema
-			values[i] = &sql.NullInt64{}
-		case metadata.ForeignKeys[2]: // user_metadata
+		case metadata.ForeignKeys[1]: // user_metadata
 			values[i] = &sql.NullInt64{}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Metadata", columns[i])
@@ -138,13 +118,6 @@ func (m *Metadata) assignValues(columns []string, values []interface{}) error {
 			}
 		case metadata.ForeignKeys[1]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field metadata_schema", value)
-			} else if value.Valid {
-				m.metadata_schema = new(int)
-				*m.metadata_schema = int(value.Int64)
-			}
-		case metadata.ForeignKeys[2]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field user_metadata", value)
 			} else if value.Valid {
 				m.user_metadata = new(int)
@@ -153,11 +126,6 @@ func (m *Metadata) assignValues(columns []string, values []interface{}) error {
 		}
 	}
 	return nil
-}
-
-// QuerySchema queries the schema edge of the Metadata.
-func (m *Metadata) QuerySchema() *MetadataSchemaQuery {
-	return (&MetadataClient{config: m.config}).QuerySchema(m)
 }
 
 // QueryUser queries the user edge of the Metadata.

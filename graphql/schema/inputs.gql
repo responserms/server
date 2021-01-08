@@ -22,3 +22,7 @@ input PaginationInput {
   before: Cursor
   last: Int
 }
+
+input SearchInput {
+  query: String!
+}

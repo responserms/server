@@ -14,7 +14,7 @@ import (
 	"github.com/responserms/server/ent/metadata"
 	"github.com/responserms/server/ent/player"
 	"github.com/responserms/server/ent/predicate"
-	"github.com/responserms/server/ent/sessiontoken"
+	"github.com/responserms/server/ent/session"
 	"github.com/responserms/server/ent/user"
 )
 
@@ -182,19 +182,19 @@ func (uu *UserUpdate) SetMetadata(m *Metadata) *UserUpdate {
 	return uu.SetMetadataID(m.ID)
 }
 
-// AddSessionTokenIDs adds the session_tokens edge to SessionToken by ids.
-func (uu *UserUpdate) AddSessionTokenIDs(ids ...int) *UserUpdate {
-	uu.mutation.AddSessionTokenIDs(ids...)
+// AddSessionIDs adds the sessions edge to Session by ids.
+func (uu *UserUpdate) AddSessionIDs(ids ...int) *UserUpdate {
+	uu.mutation.AddSessionIDs(ids...)
 	return uu
 }
 
-// AddSessionTokens adds the session_tokens edges to SessionToken.
-func (uu *UserUpdate) AddSessionTokens(s ...*SessionToken) *UserUpdate {
+// AddSessions adds the sessions edges to Session.
+func (uu *UserUpdate) AddSessions(s ...*Session) *UserUpdate {
 	ids := make([]int, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
-	return uu.AddSessionTokenIDs(ids...)
+	return uu.AddSessionIDs(ids...)
 }
 
 // SetActivationID sets the activation edge to Activation by id.
@@ -257,25 +257,25 @@ func (uu *UserUpdate) ClearMetadata() *UserUpdate {
 	return uu
 }
 
-// ClearSessionTokens clears all "session_tokens" edges to type SessionToken.
-func (uu *UserUpdate) ClearSessionTokens() *UserUpdate {
-	uu.mutation.ClearSessionTokens()
+// ClearSessions clears all "sessions" edges to type Session.
+func (uu *UserUpdate) ClearSessions() *UserUpdate {
+	uu.mutation.ClearSessions()
 	return uu
 }
 
-// RemoveSessionTokenIDs removes the session_tokens edge to SessionToken by ids.
-func (uu *UserUpdate) RemoveSessionTokenIDs(ids ...int) *UserUpdate {
-	uu.mutation.RemoveSessionTokenIDs(ids...)
+// RemoveSessionIDs removes the sessions edge to Session by ids.
+func (uu *UserUpdate) RemoveSessionIDs(ids ...int) *UserUpdate {
+	uu.mutation.RemoveSessionIDs(ids...)
 	return uu
 }
 
-// RemoveSessionTokens removes session_tokens edges to SessionToken.
-func (uu *UserUpdate) RemoveSessionTokens(s ...*SessionToken) *UserUpdate {
+// RemoveSessions removes sessions edges to Session.
+func (uu *UserUpdate) RemoveSessions(s ...*Session) *UserUpdate {
 	ids := make([]int, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
-	return uu.RemoveSessionTokenIDs(ids...)
+	return uu.RemoveSessionIDs(ids...)
 }
 
 // ClearActivation clears the "activation" edge to type Activation.
@@ -532,33 +532,33 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uu.mutation.SessionTokensCleared() {
+	if uu.mutation.SessionsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.SessionTokensTable,
-			Columns: []string{user.SessionTokensColumn},
+			Table:   user.SessionsTable,
+			Columns: []string{user.SessionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: sessiontoken.FieldID,
+					Column: session.FieldID,
 				},
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.RemovedSessionTokensIDs(); len(nodes) > 0 && !uu.mutation.SessionTokensCleared() {
+	if nodes := uu.mutation.RemovedSessionsIDs(); len(nodes) > 0 && !uu.mutation.SessionsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.SessionTokensTable,
-			Columns: []string{user.SessionTokensColumn},
+			Table:   user.SessionsTable,
+			Columns: []string{user.SessionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: sessiontoken.FieldID,
+					Column: session.FieldID,
 				},
 			},
 		}
@@ -567,17 +567,17 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.SessionTokensIDs(); len(nodes) > 0 {
+	if nodes := uu.mutation.SessionsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.SessionTokensTable,
-			Columns: []string{user.SessionTokensColumn},
+			Table:   user.SessionsTable,
+			Columns: []string{user.SessionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: sessiontoken.FieldID,
+					Column: session.FieldID,
 				},
 			},
 		}
@@ -898,19 +898,19 @@ func (uuo *UserUpdateOne) SetMetadata(m *Metadata) *UserUpdateOne {
 	return uuo.SetMetadataID(m.ID)
 }
 
-// AddSessionTokenIDs adds the session_tokens edge to SessionToken by ids.
-func (uuo *UserUpdateOne) AddSessionTokenIDs(ids ...int) *UserUpdateOne {
-	uuo.mutation.AddSessionTokenIDs(ids...)
+// AddSessionIDs adds the sessions edge to Session by ids.
+func (uuo *UserUpdateOne) AddSessionIDs(ids ...int) *UserUpdateOne {
+	uuo.mutation.AddSessionIDs(ids...)
 	return uuo
 }
 
-// AddSessionTokens adds the session_tokens edges to SessionToken.
-func (uuo *UserUpdateOne) AddSessionTokens(s ...*SessionToken) *UserUpdateOne {
+// AddSessions adds the sessions edges to Session.
+func (uuo *UserUpdateOne) AddSessions(s ...*Session) *UserUpdateOne {
 	ids := make([]int, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
-	return uuo.AddSessionTokenIDs(ids...)
+	return uuo.AddSessionIDs(ids...)
 }
 
 // SetActivationID sets the activation edge to Activation by id.
@@ -973,25 +973,25 @@ func (uuo *UserUpdateOne) ClearMetadata() *UserUpdateOne {
 	return uuo
 }
 
-// ClearSessionTokens clears all "session_tokens" edges to type SessionToken.
-func (uuo *UserUpdateOne) ClearSessionTokens() *UserUpdateOne {
-	uuo.mutation.ClearSessionTokens()
+// ClearSessions clears all "sessions" edges to type Session.
+func (uuo *UserUpdateOne) ClearSessions() *UserUpdateOne {
+	uuo.mutation.ClearSessions()
 	return uuo
 }
 
-// RemoveSessionTokenIDs removes the session_tokens edge to SessionToken by ids.
-func (uuo *UserUpdateOne) RemoveSessionTokenIDs(ids ...int) *UserUpdateOne {
-	uuo.mutation.RemoveSessionTokenIDs(ids...)
+// RemoveSessionIDs removes the sessions edge to Session by ids.
+func (uuo *UserUpdateOne) RemoveSessionIDs(ids ...int) *UserUpdateOne {
+	uuo.mutation.RemoveSessionIDs(ids...)
 	return uuo
 }
 
-// RemoveSessionTokens removes session_tokens edges to SessionToken.
-func (uuo *UserUpdateOne) RemoveSessionTokens(s ...*SessionToken) *UserUpdateOne {
+// RemoveSessions removes sessions edges to Session.
+func (uuo *UserUpdateOne) RemoveSessions(s ...*Session) *UserUpdateOne {
 	ids := make([]int, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
-	return uuo.RemoveSessionTokenIDs(ids...)
+	return uuo.RemoveSessionIDs(ids...)
 }
 
 // ClearActivation clears the "activation" edge to type Activation.
@@ -1246,33 +1246,33 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uuo.mutation.SessionTokensCleared() {
+	if uuo.mutation.SessionsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.SessionTokensTable,
-			Columns: []string{user.SessionTokensColumn},
+			Table:   user.SessionsTable,
+			Columns: []string{user.SessionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: sessiontoken.FieldID,
+					Column: session.FieldID,
 				},
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.RemovedSessionTokensIDs(); len(nodes) > 0 && !uuo.mutation.SessionTokensCleared() {
+	if nodes := uuo.mutation.RemovedSessionsIDs(); len(nodes) > 0 && !uuo.mutation.SessionsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.SessionTokensTable,
-			Columns: []string{user.SessionTokensColumn},
+			Table:   user.SessionsTable,
+			Columns: []string{user.SessionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: sessiontoken.FieldID,
+					Column: session.FieldID,
 				},
 			},
 		}
@@ -1281,17 +1281,17 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.SessionTokensIDs(); len(nodes) > 0 {
+	if nodes := uuo.mutation.SessionsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.SessionTokensTable,
-			Columns: []string{user.SessionTokensColumn},
+			Table:   user.SessionsTable,
+			Columns: []string{user.SessionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: sessiontoken.FieldID,
+					Column: session.FieldID,
 				},
 			},
 		}

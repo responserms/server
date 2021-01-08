@@ -8,12 +8,11 @@ import (
 	"github.com/responserms/server/ent/activation"
 	"github.com/responserms/server/ent/maplayer"
 	"github.com/responserms/server/ent/maptype"
-	"github.com/responserms/server/ent/metadataschema"
 	"github.com/responserms/server/ent/player"
 	"github.com/responserms/server/ent/playeridentifier"
 	"github.com/responserms/server/ent/schema"
 	"github.com/responserms/server/ent/server"
-	"github.com/responserms/server/ent/sessiontoken"
+	"github.com/responserms/server/ent/session"
 	"github.com/responserms/server/ent/user"
 )
 
@@ -66,21 +65,6 @@ func init() {
 	maptype.DefaultUpdatedAt = maptypeDescUpdatedAt.Default.(func() time.Time)
 	// maptype.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	maptype.UpdateDefaultUpdatedAt = maptypeDescUpdatedAt.UpdateDefault.(func() time.Time)
-	metadataschemaMixin := schema.MetadataSchema{}.Mixin()
-	metadataschemaMixinFields0 := metadataschemaMixin[0].Fields()
-	_ = metadataschemaMixinFields0
-	metadataschemaFields := schema.MetadataSchema{}.Fields()
-	_ = metadataschemaFields
-	// metadataschemaDescCreatedAt is the schema descriptor for created_at field.
-	metadataschemaDescCreatedAt := metadataschemaMixinFields0[0].Descriptor()
-	// metadataschema.DefaultCreatedAt holds the default value on creation for the created_at field.
-	metadataschema.DefaultCreatedAt = metadataschemaDescCreatedAt.Default.(func() time.Time)
-	// metadataschemaDescUpdatedAt is the schema descriptor for updated_at field.
-	metadataschemaDescUpdatedAt := metadataschemaMixinFields0[1].Descriptor()
-	// metadataschema.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	metadataschema.DefaultUpdatedAt = metadataschemaDescUpdatedAt.Default.(func() time.Time)
-	// metadataschema.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	metadataschema.UpdateDefaultUpdatedAt = metadataschemaDescUpdatedAt.UpdateDefault.(func() time.Time)
 	playerMixin := schema.Player{}.Mixin()
 	playerMixinFields0 := playerMixin[0].Fields()
 	_ = playerMixinFields0
@@ -130,21 +114,21 @@ func init() {
 	server.DefaultUpdatedAt = serverDescUpdatedAt.Default.(func() time.Time)
 	// server.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	server.UpdateDefaultUpdatedAt = serverDescUpdatedAt.UpdateDefault.(func() time.Time)
-	sessiontokenMixin := schema.SessionToken{}.Mixin()
-	sessiontokenMixinFields0 := sessiontokenMixin[0].Fields()
-	_ = sessiontokenMixinFields0
-	sessiontokenFields := schema.SessionToken{}.Fields()
-	_ = sessiontokenFields
-	// sessiontokenDescCreatedAt is the schema descriptor for created_at field.
-	sessiontokenDescCreatedAt := sessiontokenMixinFields0[0].Descriptor()
-	// sessiontoken.DefaultCreatedAt holds the default value on creation for the created_at field.
-	sessiontoken.DefaultCreatedAt = sessiontokenDescCreatedAt.Default.(func() time.Time)
-	// sessiontokenDescUpdatedAt is the schema descriptor for updated_at field.
-	sessiontokenDescUpdatedAt := sessiontokenMixinFields0[1].Descriptor()
-	// sessiontoken.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	sessiontoken.DefaultUpdatedAt = sessiontokenDescUpdatedAt.Default.(func() time.Time)
-	// sessiontoken.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	sessiontoken.UpdateDefaultUpdatedAt = sessiontokenDescUpdatedAt.UpdateDefault.(func() time.Time)
+	sessionMixin := schema.Session{}.Mixin()
+	sessionMixinFields0 := sessionMixin[0].Fields()
+	_ = sessionMixinFields0
+	sessionFields := schema.Session{}.Fields()
+	_ = sessionFields
+	// sessionDescCreateTime is the schema descriptor for create_time field.
+	sessionDescCreateTime := sessionMixinFields0[0].Descriptor()
+	// session.DefaultCreateTime holds the default value on creation for the create_time field.
+	session.DefaultCreateTime = sessionDescCreateTime.Default.(func() time.Time)
+	// sessionDescUpdateTime is the schema descriptor for update_time field.
+	sessionDescUpdateTime := sessionMixinFields0[1].Descriptor()
+	// session.DefaultUpdateTime holds the default value on creation for the update_time field.
+	session.DefaultUpdateTime = sessionDescUpdateTime.Default.(func() time.Time)
+	// session.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
+	session.UpdateDefaultUpdateTime = sessionDescUpdateTime.UpdateDefault.(func() time.Time)
 	userMixin := schema.User{}.Mixin()
 	userMixinFields1 := userMixin[1].Fields()
 	_ = userMixinFields1

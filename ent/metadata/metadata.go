@@ -10,8 +10,6 @@ const (
 	// FieldData holds the string denoting the data field in the database.
 	FieldData = "data"
 
-	// EdgeSchema holds the string denoting the schema edge name in mutations.
-	EdgeSchema = "schema"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
 	// EdgeMapType holds the string denoting the map_type edge name in mutations.
@@ -19,13 +17,6 @@ const (
 
 	// Table holds the table name of the metadata in the database.
 	Table = "metadata"
-	// SchemaTable is the table the holds the schema relation/edge.
-	SchemaTable = "metadata"
-	// SchemaInverseTable is the table name for the MetadataSchema entity.
-	// It exists in this package in order to avoid circular dependency with the "metadataschema" package.
-	SchemaInverseTable = "metadata_schemas"
-	// SchemaColumn is the table column denoting the schema relation/edge.
-	SchemaColumn = "metadata_schema"
 	// UserTable is the table the holds the user relation/edge.
 	UserTable = "metadata"
 	// UserInverseTable is the table name for the User entity.
@@ -51,7 +42,6 @@ var Columns = []string{
 // ForeignKeys holds the SQL foreign-keys that are owned by the Metadata type.
 var ForeignKeys = []string{
 	"map_type_metadata",
-	"metadata_schema",
 	"user_metadata",
 }
 

@@ -48,8 +48,8 @@ type User struct {
 type UserEdges struct {
 	// Metadata holds the value of the metadata edge.
 	Metadata *Metadata
-	// SessionTokens holds the value of the session_tokens edge.
-	SessionTokens []*SessionToken
+	// Sessions holds the value of the sessions edge.
+	Sessions []*Session
 	// Activation holds the value of the activation edge.
 	Activation *Activation
 	// Activations holds the value of the activations edge.
@@ -75,13 +75,13 @@ func (e UserEdges) MetadataOrErr() (*Metadata, error) {
 	return nil, &NotLoadedError{edge: "metadata"}
 }
 
-// SessionTokensOrErr returns the SessionTokens value or an error if the edge
+// SessionsOrErr returns the Sessions value or an error if the edge
 // was not loaded in eager-loading.
-func (e UserEdges) SessionTokensOrErr() ([]*SessionToken, error) {
+func (e UserEdges) SessionsOrErr() ([]*Session, error) {
 	if e.loadedTypes[1] {
-		return e.SessionTokens, nil
+		return e.Sessions, nil
 	}
-	return nil, &NotLoadedError{edge: "session_tokens"}
+	return nil, &NotLoadedError{edge: "sessions"}
 }
 
 // ActivationOrErr returns the Activation value or an error if the edge
@@ -234,9 +234,9 @@ func (u *User) QueryMetadata() *MetadataQuery {
 	return (&UserClient{config: u.config}).QueryMetadata(u)
 }
 
-// QuerySessionTokens queries the session_tokens edge of the User.
-func (u *User) QuerySessionTokens() *SessionTokenQuery {
-	return (&UserClient{config: u.config}).QuerySessionTokens(u)
+// QuerySessions queries the sessions edge of the User.
+func (u *User) QuerySessions() *SessionQuery {
+	return (&UserClient{config: u.config}).QuerySessions(u)
 }
 
 // QueryActivation queries the activation edge of the User.

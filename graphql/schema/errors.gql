@@ -1,0 +1,5 @@
+"This error is presented when an input path fails validation."
+type InputIsInvalidError implements Error {
+  message: String!
+  path: [String!]
+}

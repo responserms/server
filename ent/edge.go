@@ -60,14 +60,6 @@ func (mt *MapType) Servers(ctx context.Context) ([]*Server, error) {
 	return result, err
 }
 
-func (m *Metadata) Schema(ctx context.Context) (*MetadataSchema, error) {
-	result, err := m.Edges.SchemaOrErr()
-	if IsNotLoaded(err) {
-		result, err = m.QuerySchema().Only(ctx)
-	}
-	return result, MaskNotFound(err)
-}
-
 func (m *Metadata) User(ctx context.Context) (*User, error) {
 	result, err := m.Edges.UserOrErr()
 	if IsNotLoaded(err) {
@@ -82,14 +74,6 @@ func (m *Metadata) MapType(ctx context.Context) (*MapType, error) {
 		result, err = m.QueryMapType().Only(ctx)
 	}
 	return result, MaskNotFound(err)
-}
-
-func (ms *MetadataSchema) Metadata(ctx context.Context) ([]*Metadata, error) {
-	result, err := ms.Edges.MetadataOrErr()
-	if IsNotLoaded(err) {
-		result, err = ms.QueryMetadata().All(ctx)
-	}
-	return result, err
 }
 
 func (pl *Player) Metadata(ctx context.Context) (*Metadata, error) {
@@ -180,10 +164,26 @@ func (st *ServerType) Servers(ctx context.Context) ([]*Server, error) {
 	return result, err
 }
 
-func (st *SessionToken) User(ctx context.Context) (*User, error) {
-	result, err := st.Edges.UserOrErr()
+func (s *Session) Token(ctx context.Context) (*Token, error) {
+	result, err := s.Edges.TokenOrErr()
 	if IsNotLoaded(err) {
-		result, err = st.QueryUser().Only(ctx)
+		result, err = s.QueryToken().Only(ctx)
+	}
+	return result, MaskNotFound(err)
+}
+
+func (s *Session) User(ctx context.Context) (*User, error) {
+	result, err := s.Edges.UserOrErr()
+	if IsNotLoaded(err) {
+		result, err = s.QueryUser().Only(ctx)
+	}
+	return result, MaskNotFound(err)
+}
+
+func (t *Token) Session(ctx context.Context) (*Session, error) {
+	result, err := t.Edges.SessionOrErr()
+	if IsNotLoaded(err) {
+		result, err = t.QuerySession().Only(ctx)
 	}
 	return result, MaskNotFound(err)
 }
@@ -196,10 +196,10 @@ func (u *User) Metadata(ctx context.Context) (*Metadata, error) {
 	return result, MaskNotFound(err)
 }
 
-func (u *User) SessionTokens(ctx context.Context) ([]*SessionToken, error) {
-	result, err := u.Edges.SessionTokensOrErr()
+func (u *User) Sessions(ctx context.Context) ([]*Session, error) {
+	result, err := u.Edges.SessionsOrErr()
 	if IsNotLoaded(err) {
-		result, err = u.QuerySessionTokens().All(ctx)
+		result, err = u.QuerySessions().All(ctx)
 	}
 	return result, err
 }

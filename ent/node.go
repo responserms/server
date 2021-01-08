@@ -20,12 +20,12 @@ import (
 	"github.com/responserms/server/ent/maplayer"
 	"github.com/responserms/server/ent/maptype"
 	"github.com/responserms/server/ent/metadata"
-	"github.com/responserms/server/ent/metadataschema"
 	"github.com/responserms/server/ent/player"
 	"github.com/responserms/server/ent/playeridentifier"
 	"github.com/responserms/server/ent/server"
 	"github.com/responserms/server/ent/servertype"
-	"github.com/responserms/server/ent/sessiontoken"
+	"github.com/responserms/server/ent/session"
+	"github.com/responserms/server/ent/token"
 	"github.com/responserms/server/ent/user"
 	"golang.org/x/sync/semaphore"
 )
@@ -319,7 +319,7 @@ func (m *Metadata) Node(ctx context.Context) (node *Node, err error) {
 		ID:     m.ID,
 		Type:   "Metadata",
 		Fields: make([]*Field, 1),
-		Edges:  make([]*Edge, 3),
+		Edges:  make([]*Edge, 2),
 	}
 	var buf []byte
 	if buf, err = json.Marshal(m.Data); err != nil {
@@ -331,92 +331,21 @@ func (m *Metadata) Node(ctx context.Context) (node *Node, err error) {
 		Value: string(buf),
 	}
 	node.Edges[0] = &Edge{
-		Type: "MetadataSchema",
-		Name: "schema",
-	}
-	node.Edges[0].IDs, err = m.QuerySchema().
-		Select(metadataschema.FieldID).
-		Ints(ctx)
-	if err != nil {
-		return nil, err
-	}
-	node.Edges[1] = &Edge{
 		Type: "User",
 		Name: "user",
 	}
-	node.Edges[1].IDs, err = m.QueryUser().
+	node.Edges[0].IDs, err = m.QueryUser().
 		Select(user.FieldID).
 		Ints(ctx)
 	if err != nil {
 		return nil, err
 	}
-	node.Edges[2] = &Edge{
+	node.Edges[1] = &Edge{
 		Type: "MapType",
 		Name: "map_type",
 	}
-	node.Edges[2].IDs, err = m.QueryMapType().
+	node.Edges[1].IDs, err = m.QueryMapType().
 		Select(maptype.FieldID).
-		Ints(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return node, nil
-}
-
-func (ms *MetadataSchema) Node(ctx context.Context) (node *Node, err error) {
-	node = &Node{
-		ID:     ms.ID,
-		Type:   "MetadataSchema",
-		Fields: make([]*Field, 5),
-		Edges:  make([]*Edge, 1),
-	}
-	var buf []byte
-	if buf, err = json.Marshal(ms.CreatedAt); err != nil {
-		return nil, err
-	}
-	node.Fields[0] = &Field{
-		Type:  "time.Time",
-		Name:  "created_at",
-		Value: string(buf),
-	}
-	if buf, err = json.Marshal(ms.UpdatedAt); err != nil {
-		return nil, err
-	}
-	node.Fields[1] = &Field{
-		Type:  "time.Time",
-		Name:  "updated_at",
-		Value: string(buf),
-	}
-	if buf, err = json.Marshal(ms.Name); err != nil {
-		return nil, err
-	}
-	node.Fields[2] = &Field{
-		Type:  "string",
-		Name:  "name",
-		Value: string(buf),
-	}
-	if buf, err = json.Marshal(ms.About); err != nil {
-		return nil, err
-	}
-	node.Fields[3] = &Field{
-		Type:  "string",
-		Name:  "about",
-		Value: string(buf),
-	}
-	if buf, err = json.Marshal(ms.Schema); err != nil {
-		return nil, err
-	}
-	node.Fields[4] = &Field{
-		Type:  "*jsonschema.Schema",
-		Name:  "schema",
-		Value: string(buf),
-	}
-	node.Edges[0] = &Edge{
-		Type: "Metadata",
-		Name: "metadata",
-	}
-	node.Edges[0].IDs, err = ms.QueryMetadata().
-		Select(metadata.FieldID).
 		Ints(ctx)
 	if err != nil {
 		return nil, err
@@ -746,52 +675,139 @@ func (st *ServerType) Node(ctx context.Context) (node *Node, err error) {
 	return node, nil
 }
 
-func (st *SessionToken) Node(ctx context.Context) (node *Node, err error) {
+func (s *Session) Node(ctx context.Context) (node *Node, err error) {
 	node = &Node{
-		ID:     st.ID,
-		Type:   "SessionToken",
-		Fields: make([]*Field, 4),
-		Edges:  make([]*Edge, 1),
+		ID:     s.ID,
+		Type:   "Session",
+		Fields: make([]*Field, 9),
+		Edges:  make([]*Edge, 2),
 	}
 	var buf []byte
-	if buf, err = json.Marshal(st.CreatedAt); err != nil {
+	if buf, err = json.Marshal(s.CreateTime); err != nil {
 		return nil, err
 	}
 	node.Fields[0] = &Field{
 		Type:  "time.Time",
-		Name:  "created_at",
+		Name:  "create_time",
 		Value: string(buf),
 	}
-	if buf, err = json.Marshal(st.UpdatedAt); err != nil {
+	if buf, err = json.Marshal(s.UpdateTime); err != nil {
 		return nil, err
 	}
 	node.Fields[1] = &Field{
 		Type:  "time.Time",
-		Name:  "updated_at",
+		Name:  "update_time",
 		Value: string(buf),
 	}
-	if buf, err = json.Marshal(st.BlockedAt); err != nil {
+	if buf, err = json.Marshal(s.IPAddress); err != nil {
 		return nil, err
 	}
 	node.Fields[2] = &Field{
-		Type:  "time.Time",
-		Name:  "blocked_at",
+		Type:  "string",
+		Name:  "ip_address",
 		Value: string(buf),
 	}
-	if buf, err = json.Marshal(st.ExpiredAt); err != nil {
+	if buf, err = json.Marshal(s.BrowserName); err != nil {
 		return nil, err
 	}
 	node.Fields[3] = &Field{
+		Type:  "string",
+		Name:  "browser_name",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(s.BrowserVersion); err != nil {
+		return nil, err
+	}
+	node.Fields[4] = &Field{
+		Type:  "string",
+		Name:  "browser_version",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(s.DeviceOs); err != nil {
+		return nil, err
+	}
+	node.Fields[5] = &Field{
+		Type:  "string",
+		Name:  "device_os",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(s.DeviceType); err != nil {
+		return nil, err
+	}
+	node.Fields[6] = &Field{
+		Type:  "string",
+		Name:  "device_type",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(s.Claims); err != nil {
+		return nil, err
+	}
+	node.Fields[7] = &Field{
+		Type:  "string",
+		Name:  "claims",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(s.TerminatedAt); err != nil {
+		return nil, err
+	}
+	node.Fields[8] = &Field{
+		Type:  "time.Time",
+		Name:  "terminated_at",
+		Value: string(buf),
+	}
+	node.Edges[0] = &Edge{
+		Type: "Token",
+		Name: "token",
+	}
+	node.Edges[0].IDs, err = s.QueryToken().
+		Select(token.FieldID).
+		Ints(ctx)
+	if err != nil {
+		return nil, err
+	}
+	node.Edges[1] = &Edge{
+		Type: "User",
+		Name: "user",
+	}
+	node.Edges[1].IDs, err = s.QueryUser().
+		Select(user.FieldID).
+		Ints(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return node, nil
+}
+
+func (t *Token) Node(ctx context.Context) (node *Node, err error) {
+	node = &Node{
+		ID:     t.ID,
+		Type:   "Token",
+		Fields: make([]*Field, 2),
+		Edges:  make([]*Edge, 1),
+	}
+	var buf []byte
+	if buf, err = json.Marshal(t.ExpiredAt); err != nil {
+		return nil, err
+	}
+	node.Fields[0] = &Field{
 		Type:  "time.Time",
 		Name:  "expired_at",
 		Value: string(buf),
 	}
-	node.Edges[0] = &Edge{
-		Type: "User",
-		Name: "user",
+	if buf, err = json.Marshal(t.BlockedAt); err != nil {
+		return nil, err
 	}
-	node.Edges[0].IDs, err = st.QueryUser().
-		Select(user.FieldID).
+	node.Fields[1] = &Field{
+		Type:  "time.Time",
+		Name:  "blocked_at",
+		Value: string(buf),
+	}
+	node.Edges[0] = &Edge{
+		Type: "Session",
+		Name: "session",
+	}
+	node.Edges[0].IDs, err = t.QuerySession().
+		Select(session.FieldID).
 		Ints(ctx)
 	if err != nil {
 		return nil, err
@@ -898,11 +914,11 @@ func (u *User) Node(ctx context.Context) (node *Node, err error) {
 		return nil, err
 	}
 	node.Edges[1] = &Edge{
-		Type: "SessionToken",
-		Name: "session_tokens",
+		Type: "Session",
+		Name: "sessions",
 	}
-	node.Edges[1].IDs, err = u.QuerySessionTokens().
-		Select(sessiontoken.FieldID).
+	node.Edges[1].IDs, err = u.QuerySessions().
+		Select(session.FieldID).
 		Ints(ctx)
 	if err != nil {
 		return nil, err
@@ -1052,15 +1068,6 @@ func (c *Client) noder(ctx context.Context, table string, id int) (Noder, error)
 			return nil, err
 		}
 		return n, nil
-	case metadataschema.Table:
-		n, err := c.MetadataSchema.Query().
-			Where(metadataschema.ID(id)).
-			CollectFields(ctx, "MetadataSchema").
-			Only(ctx)
-		if err != nil {
-			return nil, err
-		}
-		return n, nil
 	case player.Table:
 		n, err := c.Player.Query().
 			Where(player.ID(id)).
@@ -1097,10 +1104,19 @@ func (c *Client) noder(ctx context.Context, table string, id int) (Noder, error)
 			return nil, err
 		}
 		return n, nil
-	case sessiontoken.Table:
-		n, err := c.SessionToken.Query().
-			Where(sessiontoken.ID(id)).
-			CollectFields(ctx, "SessionToken").
+	case session.Table:
+		n, err := c.Session.Query().
+			Where(session.ID(id)).
+			CollectFields(ctx, "Session").
+			Only(ctx)
+		if err != nil {
+			return nil, err
+		}
+		return n, nil
+	case token.Table:
+		n, err := c.Token.Query().
+			Where(token.ID(id)).
+			CollectFields(ctx, "Token").
 			Only(ctx)
 		if err != nil {
 			return nil, err
@@ -1253,19 +1269,6 @@ func (c *Client) noders(ctx context.Context, table string, ids []int) ([]Noder, 
 				*noder = node
 			}
 		}
-	case metadataschema.Table:
-		nodes, err := c.MetadataSchema.Query().
-			Where(metadataschema.IDIn(ids...)).
-			CollectFields(ctx, "MetadataSchema").
-			All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		for _, node := range nodes {
-			for _, noder := range idmap[node.ID] {
-				*noder = node
-			}
-		}
 	case player.Table:
 		nodes, err := c.Player.Query().
 			Where(player.IDIn(ids...)).
@@ -1318,10 +1321,23 @@ func (c *Client) noders(ctx context.Context, table string, ids []int) ([]Noder, 
 				*noder = node
 			}
 		}
-	case sessiontoken.Table:
-		nodes, err := c.SessionToken.Query().
-			Where(sessiontoken.IDIn(ids...)).
-			CollectFields(ctx, "SessionToken").
+	case session.Table:
+		nodes, err := c.Session.Query().
+			Where(session.IDIn(ids...)).
+			CollectFields(ctx, "Session").
+			All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, node := range nodes {
+			for _, noder := range idmap[node.ID] {
+				*noder = node
+			}
+		}
+	case token.Table:
+		nodes, err := c.Token.Query().
+			Where(token.IDIn(ids...)).
+			CollectFields(ctx, "Token").
 			All(ctx)
 		if err != nil {
 			return nil, err

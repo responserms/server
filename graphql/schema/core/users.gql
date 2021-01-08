@@ -1,0 +1,66 @@
+type User implements Node {
+  id: ID!
+  name: String!
+  email: String!
+  active: Boolean!
+  disabled_at: Time
+  disabled_reason: String
+  created_at: Time!
+  updated_at: Time!
+
+  metadata: Metadata
+  # sessions(
+  #   paginate: PaginationInput
+  #   filter: FilterSessionToken
+  # ): SessionTokenConnection @goField(forceResolver: true)
+}
+
+extend type Query {
+  me: User @isAuthenticated
+
+  user(id: ID!): User @hasPermission(permission: "users.read")
+
+  users(
+    paginate: PaginationInput
+    orderBy: UserOrder
+    filter: UserFilter
+  ): UserConnection @hasPermission(permission: "users.list")
+}
+
+# extend type Mutation {
+#   updateUser(input: UpdateUserInput!): UpdateUserPayload!
+#   disableUsers(input: DisableUserInput!): DisableUsersPayload!
+# }
+
+### query.users
+
+enum UserOrderField {
+  CREATED_AT
+  UPDATED_AT
+}
+
+input UserFilter {
+  active: Boolean
+  disabled: Boolean
+  search: SearchInput
+}
+
+input UserOrder {
+  direction: OrderDirection!
+  field: UserOrderField!
+}
+
+type UserConnection {
+  totalCount: Int!
+  pageInfo: PageInfo!
+  edges: [UserEdge]
+}
+
+type UserEdge {
+  node: User
+  cursor: Cursor!
+}
+
+### query.user
+
+### mutation.updateUser

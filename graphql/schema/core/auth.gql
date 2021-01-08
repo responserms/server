@@ -1,0 +1,4 @@
+input Credentials {
+  email: String!
+  password: String!
+}

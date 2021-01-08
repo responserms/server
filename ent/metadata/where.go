@@ -91,34 +91,6 @@ func IDLTE(id int) predicate.Metadata {
 	})
 }
 
-// HasSchema applies the HasEdge predicate on the "schema" edge.
-func HasSchema() predicate.Metadata {
-	return predicate.Metadata(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(SchemaTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, SchemaTable, SchemaColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasSchemaWith applies the HasEdge predicate on the "schema" edge with a given conditions (other predicates).
-func HasSchemaWith(preds ...predicate.MetadataSchema) predicate.Metadata {
-	return predicate.Metadata(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(SchemaInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, SchemaTable, SchemaColumn),
-		)
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
 // HasUser applies the HasEdge predicate on the "user" edge.
 func HasUser() predicate.Metadata {
 	return predicate.Metadata(func(s *sql.Selector) {

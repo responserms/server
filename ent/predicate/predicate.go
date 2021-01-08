@@ -21,9 +21,6 @@ type MapType func(*sql.Selector)
 // Metadata is the predicate function for metadata builders.
 type Metadata func(*sql.Selector)
 
-// MetadataSchema is the predicate function for metadataschema builders.
-type MetadataSchema func(*sql.Selector)
-
 // Player is the predicate function for player builders.
 type Player func(*sql.Selector)
 
@@ -36,8 +33,11 @@ type Server func(*sql.Selector)
 // ServerType is the predicate function for servertype builders.
 type ServerType func(*sql.Selector)
 
-// SessionToken is the predicate function for sessiontoken builders.
-type SessionToken func(*sql.Selector)
+// Session is the predicate function for session builders.
+type Session func(*sql.Selector)
+
+// Token is the predicate function for token builders.
+type Token func(*sql.Selector)
 
 // User is the predicate function for user builders.
 type User func(*sql.Selector)

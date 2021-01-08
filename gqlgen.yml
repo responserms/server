@@ -32,6 +32,7 @@ struct_tag: json
 # if they match it will use them, otherwise it will generate them.
 autobind:
   - "github.com/responserms/server/ent"
+  - "github.com/responserms/server/internal/core"
   - "github.com/responserms/server/server"
 
 # This section declares type mapping between the GraphQL and go type systems

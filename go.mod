@@ -14,11 +14,13 @@ require (
 	github.com/buraksezer/olric v0.3.3
 	github.com/creasty/defaults v1.5.1
 	github.com/davecgh/go-spew v1.1.1
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/elazarl/go-bindata-assetfs v1.0.1 // indirect
 	github.com/facebook/ent v0.5.4-0.20201230110503-6716581ab438
 	github.com/facebookincubator/ent-contrib v0.0.0-20201231105736-f403feb369ff
 	github.com/fatih/color v1.10.0 // indirect
 	github.com/fatih/gomodifytags v1.13.0 // indirect
+	github.com/getsentry/sentry-go v0.9.0
 	github.com/golang/gddo v0.0.0-20201222204913-17b648fae295
 	github.com/google/go-cmp v0.5.4 // indirect
 	github.com/google/uuid v1.1.3 // indirect
@@ -33,6 +35,7 @@ require (
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/hashicorp/hcl/v2 v2.8.1
 	github.com/hashicorp/memberlist v0.2.2
+	github.com/jinzhu/copier v0.1.0
 	github.com/justinfx/olric-nats-plugin v1.0.2
 	github.com/klauspost/compress v1.11.4 // indirect
 	github.com/lib/pq v1.9.0
@@ -54,9 +57,10 @@ require (
 	github.com/vektah/gqlparser/v2 v2.1.0
 	github.com/vmihailenco/msgpack/v5 v5.0.0-beta.9
 	github.com/zclconf/go-cty v1.7.1
+	go.mongodb.org/mongo-driver v1.4.4
 	gocloud.dev v0.21.0
 	gocloud.dev/pubsub/natspubsub v0.21.0
-	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad // indirect
+	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad
 	golang.org/x/net v0.0.0-20201224014010-6772e930b67b // indirect
 	golang.org/x/sync v0.0.0-20201207232520-09787c993a3a
 	golang.org/x/sys v0.0.0-20201231184435-2d18734c6014 // indirect

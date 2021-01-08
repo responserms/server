@@ -14,12 +14,12 @@ import (
 	"github.com/responserms/server/ent/maplayer"
 	"github.com/responserms/server/ent/maptype"
 	"github.com/responserms/server/ent/metadata"
-	"github.com/responserms/server/ent/metadataschema"
 	"github.com/responserms/server/ent/player"
 	"github.com/responserms/server/ent/playeridentifier"
 	"github.com/responserms/server/ent/server"
 	"github.com/responserms/server/ent/servertype"
-	"github.com/responserms/server/ent/sessiontoken"
+	"github.com/responserms/server/ent/session"
+	"github.com/responserms/server/ent/token"
 	"github.com/responserms/server/ent/user"
 
 	"github.com/facebook/ent/dialect"
@@ -42,8 +42,6 @@ type Client struct {
 	MapType *MapTypeClient
 	// Metadata is the client for interacting with the Metadata builders.
 	Metadata *MetadataClient
-	// MetadataSchema is the client for interacting with the MetadataSchema builders.
-	MetadataSchema *MetadataSchemaClient
 	// Player is the client for interacting with the Player builders.
 	Player *PlayerClient
 	// PlayerIdentifier is the client for interacting with the PlayerIdentifier builders.
@@ -52,8 +50,10 @@ type Client struct {
 	Server *ServerClient
 	// ServerType is the client for interacting with the ServerType builders.
 	ServerType *ServerTypeClient
-	// SessionToken is the client for interacting with the SessionToken builders.
-	SessionToken *SessionTokenClient
+	// Session is the client for interacting with the Session builders.
+	Session *SessionClient
+	// Token is the client for interacting with the Token builders.
+	Token *TokenClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 	// additional fields for node api
@@ -76,12 +76,12 @@ func (c *Client) init() {
 	c.MapLayer = NewMapLayerClient(c.config)
 	c.MapType = NewMapTypeClient(c.config)
 	c.Metadata = NewMetadataClient(c.config)
-	c.MetadataSchema = NewMetadataSchemaClient(c.config)
 	c.Player = NewPlayerClient(c.config)
 	c.PlayerIdentifier = NewPlayerIdentifierClient(c.config)
 	c.Server = NewServerClient(c.config)
 	c.ServerType = NewServerTypeClient(c.config)
-	c.SessionToken = NewSessionTokenClient(c.config)
+	c.Session = NewSessionClient(c.config)
+	c.Token = NewTokenClient(c.config)
 	c.User = NewUserClient(c.config)
 }
 
@@ -120,12 +120,12 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		MapLayer:         NewMapLayerClient(cfg),
 		MapType:          NewMapTypeClient(cfg),
 		Metadata:         NewMetadataClient(cfg),
-		MetadataSchema:   NewMetadataSchemaClient(cfg),
 		Player:           NewPlayerClient(cfg),
 		PlayerIdentifier: NewPlayerIdentifierClient(cfg),
 		Server:           NewServerClient(cfg),
 		ServerType:       NewServerTypeClient(cfg),
-		SessionToken:     NewSessionTokenClient(cfg),
+		Session:          NewSessionClient(cfg),
+		Token:            NewTokenClient(cfg),
 		User:             NewUserClient(cfg),
 	}, nil
 }
@@ -147,12 +147,12 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		MapLayer:         NewMapLayerClient(cfg),
 		MapType:          NewMapTypeClient(cfg),
 		Metadata:         NewMetadataClient(cfg),
-		MetadataSchema:   NewMetadataSchemaClient(cfg),
 		Player:           NewPlayerClient(cfg),
 		PlayerIdentifier: NewPlayerIdentifierClient(cfg),
 		Server:           NewServerClient(cfg),
 		ServerType:       NewServerTypeClient(cfg),
-		SessionToken:     NewSessionTokenClient(cfg),
+		Session:          NewSessionClient(cfg),
+		Token:            NewTokenClient(cfg),
 		User:             NewUserClient(cfg),
 	}, nil
 }
@@ -187,12 +187,12 @@ func (c *Client) Use(hooks ...Hook) {
 	c.MapLayer.Use(hooks...)
 	c.MapType.Use(hooks...)
 	c.Metadata.Use(hooks...)
-	c.MetadataSchema.Use(hooks...)
 	c.Player.Use(hooks...)
 	c.PlayerIdentifier.Use(hooks...)
 	c.Server.Use(hooks...)
 	c.ServerType.Use(hooks...)
-	c.SessionToken.Use(hooks...)
+	c.Session.Use(hooks...)
+	c.Token.Use(hooks...)
 	c.User.Use(hooks...)
 }
 
@@ -743,22 +743,6 @@ func (c *MetadataClient) GetX(ctx context.Context, id int) *Metadata {
 	return obj
 }
 
-// QuerySchema queries the schema edge of a Metadata.
-func (c *MetadataClient) QuerySchema(m *Metadata) *MetadataSchemaQuery {
-	query := &MetadataSchemaQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := m.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(metadata.Table, metadata.FieldID, id),
-			sqlgraph.To(metadataschema.Table, metadataschema.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, metadata.SchemaTable, metadata.SchemaColumn),
-		)
-		fromV = sqlgraph.Neighbors(m.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
 // QueryUser queries the user edge of a Metadata.
 func (c *MetadataClient) QueryUser(m *Metadata) *UserQuery {
 	query := &UserQuery{config: c.config}
@@ -794,110 +778,6 @@ func (c *MetadataClient) QueryMapType(m *Metadata) *MapTypeQuery {
 // Hooks returns the client hooks.
 func (c *MetadataClient) Hooks() []Hook {
 	return c.hooks.Metadata
-}
-
-// MetadataSchemaClient is a client for the MetadataSchema schema.
-type MetadataSchemaClient struct {
-	config
-}
-
-// NewMetadataSchemaClient returns a client for the MetadataSchema from the given config.
-func NewMetadataSchemaClient(c config) *MetadataSchemaClient {
-	return &MetadataSchemaClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `metadataschema.Hooks(f(g(h())))`.
-func (c *MetadataSchemaClient) Use(hooks ...Hook) {
-	c.hooks.MetadataSchema = append(c.hooks.MetadataSchema, hooks...)
-}
-
-// Create returns a create builder for MetadataSchema.
-func (c *MetadataSchemaClient) Create() *MetadataSchemaCreate {
-	mutation := newMetadataSchemaMutation(c.config, OpCreate)
-	return &MetadataSchemaCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of MetadataSchema entities.
-func (c *MetadataSchemaClient) CreateBulk(builders ...*MetadataSchemaCreate) *MetadataSchemaCreateBulk {
-	return &MetadataSchemaCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for MetadataSchema.
-func (c *MetadataSchemaClient) Update() *MetadataSchemaUpdate {
-	mutation := newMetadataSchemaMutation(c.config, OpUpdate)
-	return &MetadataSchemaUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *MetadataSchemaClient) UpdateOne(ms *MetadataSchema) *MetadataSchemaUpdateOne {
-	mutation := newMetadataSchemaMutation(c.config, OpUpdateOne, withMetadataSchema(ms))
-	return &MetadataSchemaUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *MetadataSchemaClient) UpdateOneID(id int) *MetadataSchemaUpdateOne {
-	mutation := newMetadataSchemaMutation(c.config, OpUpdateOne, withMetadataSchemaID(id))
-	return &MetadataSchemaUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for MetadataSchema.
-func (c *MetadataSchemaClient) Delete() *MetadataSchemaDelete {
-	mutation := newMetadataSchemaMutation(c.config, OpDelete)
-	return &MetadataSchemaDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a delete builder for the given entity.
-func (c *MetadataSchemaClient) DeleteOne(ms *MetadataSchema) *MetadataSchemaDeleteOne {
-	return c.DeleteOneID(ms.ID)
-}
-
-// DeleteOneID returns a delete builder for the given id.
-func (c *MetadataSchemaClient) DeleteOneID(id int) *MetadataSchemaDeleteOne {
-	builder := c.Delete().Where(metadataschema.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &MetadataSchemaDeleteOne{builder}
-}
-
-// Query returns a query builder for MetadataSchema.
-func (c *MetadataSchemaClient) Query() *MetadataSchemaQuery {
-	return &MetadataSchemaQuery{config: c.config}
-}
-
-// Get returns a MetadataSchema entity by its id.
-func (c *MetadataSchemaClient) Get(ctx context.Context, id int) (*MetadataSchema, error) {
-	return c.Query().Where(metadataschema.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *MetadataSchemaClient) GetX(ctx context.Context, id int) *MetadataSchema {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// QueryMetadata queries the metadata edge of a MetadataSchema.
-func (c *MetadataSchemaClient) QueryMetadata(ms *MetadataSchema) *MetadataQuery {
-	query := &MetadataQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := ms.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(metadataschema.Table, metadataschema.FieldID, id),
-			sqlgraph.To(metadata.Table, metadata.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, metadataschema.MetadataTable, metadataschema.MetadataColumn),
-		)
-		fromV = sqlgraph.Neighbors(ms.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// Hooks returns the client hooks.
-func (c *MetadataSchemaClient) Hooks() []Hook {
-	return c.hooks.MetadataSchema
 }
 
 // PlayerClient is a client for the Player schema.
@@ -1428,82 +1308,82 @@ func (c *ServerTypeClient) Hooks() []Hook {
 	return c.hooks.ServerType
 }
 
-// SessionTokenClient is a client for the SessionToken schema.
-type SessionTokenClient struct {
+// SessionClient is a client for the Session schema.
+type SessionClient struct {
 	config
 }
 
-// NewSessionTokenClient returns a client for the SessionToken from the given config.
-func NewSessionTokenClient(c config) *SessionTokenClient {
-	return &SessionTokenClient{config: c}
+// NewSessionClient returns a client for the Session from the given config.
+func NewSessionClient(c config) *SessionClient {
+	return &SessionClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `sessiontoken.Hooks(f(g(h())))`.
-func (c *SessionTokenClient) Use(hooks ...Hook) {
-	c.hooks.SessionToken = append(c.hooks.SessionToken, hooks...)
+// A call to `Use(f, g, h)` equals to `session.Hooks(f(g(h())))`.
+func (c *SessionClient) Use(hooks ...Hook) {
+	c.hooks.Session = append(c.hooks.Session, hooks...)
 }
 
-// Create returns a create builder for SessionToken.
-func (c *SessionTokenClient) Create() *SessionTokenCreate {
-	mutation := newSessionTokenMutation(c.config, OpCreate)
-	return &SessionTokenCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Create returns a create builder for Session.
+func (c *SessionClient) Create() *SessionCreate {
+	mutation := newSessionMutation(c.config, OpCreate)
+	return &SessionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// CreateBulk returns a builder for creating a bulk of SessionToken entities.
-func (c *SessionTokenClient) CreateBulk(builders ...*SessionTokenCreate) *SessionTokenCreateBulk {
-	return &SessionTokenCreateBulk{config: c.config, builders: builders}
+// CreateBulk returns a builder for creating a bulk of Session entities.
+func (c *SessionClient) CreateBulk(builders ...*SessionCreate) *SessionCreateBulk {
+	return &SessionCreateBulk{config: c.config, builders: builders}
 }
 
-// Update returns an update builder for SessionToken.
-func (c *SessionTokenClient) Update() *SessionTokenUpdate {
-	mutation := newSessionTokenMutation(c.config, OpUpdate)
-	return &SessionTokenUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Update returns an update builder for Session.
+func (c *SessionClient) Update() *SessionUpdate {
+	mutation := newSessionMutation(c.config, OpUpdate)
+	return &SessionUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *SessionTokenClient) UpdateOne(st *SessionToken) *SessionTokenUpdateOne {
-	mutation := newSessionTokenMutation(c.config, OpUpdateOne, withSessionToken(st))
-	return &SessionTokenUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *SessionClient) UpdateOne(s *Session) *SessionUpdateOne {
+	mutation := newSessionMutation(c.config, OpUpdateOne, withSession(s))
+	return &SessionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *SessionTokenClient) UpdateOneID(id int) *SessionTokenUpdateOne {
-	mutation := newSessionTokenMutation(c.config, OpUpdateOne, withSessionTokenID(id))
-	return &SessionTokenUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *SessionClient) UpdateOneID(id int) *SessionUpdateOne {
+	mutation := newSessionMutation(c.config, OpUpdateOne, withSessionID(id))
+	return &SessionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// Delete returns a delete builder for SessionToken.
-func (c *SessionTokenClient) Delete() *SessionTokenDelete {
-	mutation := newSessionTokenMutation(c.config, OpDelete)
-	return &SessionTokenDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Delete returns a delete builder for Session.
+func (c *SessionClient) Delete() *SessionDelete {
+	mutation := newSessionMutation(c.config, OpDelete)
+	return &SessionDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a delete builder for the given entity.
-func (c *SessionTokenClient) DeleteOne(st *SessionToken) *SessionTokenDeleteOne {
-	return c.DeleteOneID(st.ID)
+func (c *SessionClient) DeleteOne(s *Session) *SessionDeleteOne {
+	return c.DeleteOneID(s.ID)
 }
 
 // DeleteOneID returns a delete builder for the given id.
-func (c *SessionTokenClient) DeleteOneID(id int) *SessionTokenDeleteOne {
-	builder := c.Delete().Where(sessiontoken.ID(id))
+func (c *SessionClient) DeleteOneID(id int) *SessionDeleteOne {
+	builder := c.Delete().Where(session.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
-	return &SessionTokenDeleteOne{builder}
+	return &SessionDeleteOne{builder}
 }
 
-// Query returns a query builder for SessionToken.
-func (c *SessionTokenClient) Query() *SessionTokenQuery {
-	return &SessionTokenQuery{config: c.config}
+// Query returns a query builder for Session.
+func (c *SessionClient) Query() *SessionQuery {
+	return &SessionQuery{config: c.config}
 }
 
-// Get returns a SessionToken entity by its id.
-func (c *SessionTokenClient) Get(ctx context.Context, id int) (*SessionToken, error) {
-	return c.Query().Where(sessiontoken.ID(id)).Only(ctx)
+// Get returns a Session entity by its id.
+func (c *SessionClient) Get(ctx context.Context, id int) (*Session, error) {
+	return c.Query().Where(session.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *SessionTokenClient) GetX(ctx context.Context, id int) *SessionToken {
+func (c *SessionClient) GetX(ctx context.Context, id int) *Session {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -1511,25 +1391,145 @@ func (c *SessionTokenClient) GetX(ctx context.Context, id int) *SessionToken {
 	return obj
 }
 
-// QueryUser queries the user edge of a SessionToken.
-func (c *SessionTokenClient) QueryUser(st *SessionToken) *UserQuery {
+// QueryToken queries the token edge of a Session.
+func (c *SessionClient) QueryToken(s *Session) *TokenQuery {
+	query := &TokenQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := s.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(session.Table, session.FieldID, id),
+			sqlgraph.To(token.Table, token.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, session.TokenTable, session.TokenColumn),
+		)
+		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryUser queries the user edge of a Session.
+func (c *SessionClient) QueryUser(s *Session) *UserQuery {
 	query := &UserQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := st.ID
+		id := s.ID
 		step := sqlgraph.NewStep(
-			sqlgraph.From(sessiontoken.Table, sessiontoken.FieldID, id),
+			sqlgraph.From(session.Table, session.FieldID, id),
 			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, sessiontoken.UserTable, sessiontoken.UserColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, session.UserTable, session.UserColumn),
 		)
-		fromV = sqlgraph.Neighbors(st.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // Hooks returns the client hooks.
-func (c *SessionTokenClient) Hooks() []Hook {
-	return c.hooks.SessionToken
+func (c *SessionClient) Hooks() []Hook {
+	return c.hooks.Session
+}
+
+// TokenClient is a client for the Token schema.
+type TokenClient struct {
+	config
+}
+
+// NewTokenClient returns a client for the Token from the given config.
+func NewTokenClient(c config) *TokenClient {
+	return &TokenClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `token.Hooks(f(g(h())))`.
+func (c *TokenClient) Use(hooks ...Hook) {
+	c.hooks.Token = append(c.hooks.Token, hooks...)
+}
+
+// Create returns a create builder for Token.
+func (c *TokenClient) Create() *TokenCreate {
+	mutation := newTokenMutation(c.config, OpCreate)
+	return &TokenCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Token entities.
+func (c *TokenClient) CreateBulk(builders ...*TokenCreate) *TokenCreateBulk {
+	return &TokenCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Token.
+func (c *TokenClient) Update() *TokenUpdate {
+	mutation := newTokenMutation(c.config, OpUpdate)
+	return &TokenUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *TokenClient) UpdateOne(t *Token) *TokenUpdateOne {
+	mutation := newTokenMutation(c.config, OpUpdateOne, withToken(t))
+	return &TokenUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *TokenClient) UpdateOneID(id int) *TokenUpdateOne {
+	mutation := newTokenMutation(c.config, OpUpdateOne, withTokenID(id))
+	return &TokenUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Token.
+func (c *TokenClient) Delete() *TokenDelete {
+	mutation := newTokenMutation(c.config, OpDelete)
+	return &TokenDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *TokenClient) DeleteOne(t *Token) *TokenDeleteOne {
+	return c.DeleteOneID(t.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *TokenClient) DeleteOneID(id int) *TokenDeleteOne {
+	builder := c.Delete().Where(token.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &TokenDeleteOne{builder}
+}
+
+// Query returns a query builder for Token.
+func (c *TokenClient) Query() *TokenQuery {
+	return &TokenQuery{config: c.config}
+}
+
+// Get returns a Token entity by its id.
+func (c *TokenClient) Get(ctx context.Context, id int) (*Token, error) {
+	return c.Query().Where(token.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *TokenClient) GetX(ctx context.Context, id int) *Token {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QuerySession queries the session edge of a Token.
+func (c *TokenClient) QuerySession(t *Token) *SessionQuery {
+	query := &SessionQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := t.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(token.Table, token.FieldID, id),
+			sqlgraph.To(session.Table, session.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, token.SessionTable, token.SessionColumn),
+		)
+		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *TokenClient) Hooks() []Hook {
+	return c.hooks.Token
 }
 
 // UserClient is a client for the User schema.
@@ -1631,15 +1631,15 @@ func (c *UserClient) QueryMetadata(u *User) *MetadataQuery {
 	return query
 }
 
-// QuerySessionTokens queries the session_tokens edge of a User.
-func (c *UserClient) QuerySessionTokens(u *User) *SessionTokenQuery {
-	query := &SessionTokenQuery{config: c.config}
+// QuerySessions queries the sessions edge of a User.
+func (c *UserClient) QuerySessions(u *User) *SessionQuery {
+	query := &SessionQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
-			sqlgraph.To(sessiontoken.Table, sessiontoken.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, user.SessionTokensTable, user.SessionTokensColumn),
+			sqlgraph.To(session.Table, session.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.SessionsTable, user.SessionsColumn),
 		)
 		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
 		return fromV, nil

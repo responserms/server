@@ -5,7 +5,6 @@ local timezone if necessary.
 """
 scalar Time
 
-
 """
 Cursor for node and nodes.
 """

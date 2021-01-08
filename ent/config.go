@@ -29,12 +29,12 @@ type hooks struct {
 	MapLayer         []ent.Hook
 	MapType          []ent.Hook
 	Metadata         []ent.Hook
-	MetadataSchema   []ent.Hook
 	Player           []ent.Hook
 	PlayerIdentifier []ent.Hook
 	Server           []ent.Hook
 	ServerType       []ent.Hook
-	SessionToken     []ent.Hook
+	Session          []ent.Hook
+	Token            []ent.Hook
 	User             []ent.Hook
 }
 

@@ -3,55 +3,95 @@
 package types
 
 import (
+	"time"
+
 	"github.com/responserms/server/ent"
 )
 
-type CreateMapLayerInput struct {
-	MapType     int    `json:"map_type"`
-	Name        string `json:"name"`
-	URLTemplate string `json:"url_template"`
-	IsPublic    bool   `json:"is_public"`
+type Error interface {
+	IsError()
 }
 
-type CreateMapTypeInput struct {
-	Name    string  `json:"name"`
-	MinZoom int     `json:"min_zoom"`
-	MaxZoom int     `json:"max_zoom"`
-	MinX    float64 `json:"min_x"`
-	MinY    float64 `json:"min_y"`
-	MaxX    float64 `json:"max_x"`
-	MaxY    float64 `json:"max_y"`
+type LoginWithCredentialsError interface {
+	IsLoginWithCredentialsError()
 }
 
-type CreateServerInput struct {
-	ServerType  int     `json:"server_type"`
-	MapType     int     `json:"map_type"`
-	Name        string  `json:"name"`
-	APIUsername *string `json:"api_username"`
-	APIPort     *string `json:"api_port"`
-	APIAddress  *string `json:"api_address"`
-	APISecret   *string `json:"api_secret"`
+type RegisterWithCredentialsError interface {
+	IsRegisterWithCredentialsError()
 }
 
-type FilterSessionToken struct {
-	IsBlocked *bool `json:"is_blocked"`
-	IsExpired *bool `json:"is_expired"`
+type RegisterWithProviderErrors interface {
+	IsRegisterWithProviderErrors()
 }
 
-// Login using the provided credentials.
-type LoginInput struct {
+type AuthenticatingBrowserInput struct {
+	Name    string `json:"name"`
+	Version string `json:"version"`
+}
+
+type AuthenticatingDeviceInput struct {
+	OperatingSystem string `json:"operatingSystem"`
+	Type            string `json:"type"`
+}
+
+type Credentials struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
-// Returned when performing a `login` mutation. An access_token will be returned only when `logged_in` is true and no
-// errors are present. If `require_mfa` returns true a secondary request to `loginMfa` is required to retrieve the
-// access_token.
-type LoginResult struct {
-	LoggedIn    bool      `json:"logged_in"`
-	RequireMfa  bool      `json:"require_mfa"`
-	AccessToken *string   `json:"access_token"`
-	User        *ent.User `json:"user"`
+// This error is presented when the email provided belongs to an existing account.
+type EmailAlreadyExistsError struct {
+	Message string   `json:"message"`
+	Path    []string `json:"path"`
+}
+
+func (EmailAlreadyExistsError) IsRegisterWithCredentialsError() {}
+func (EmailAlreadyExistsError) IsError()                        {}
+
+// This error is presented when an input path fails validation.
+type InputIsInvalidError struct {
+	Message string   `json:"message"`
+	Path    []string `json:"path"`
+}
+
+func (InputIsInvalidError) IsLoginWithCredentialsError()    {}
+func (InputIsInvalidError) IsRegisterWithCredentialsError() {}
+func (InputIsInvalidError) IsRegisterWithProviderErrors()   {}
+func (InputIsInvalidError) IsError()                        {}
+
+// Returned when the credentials provided are invalid. This could mean the email is not registered or the password does not
+// match the provided email address.
+type InvalidCredentialsError struct {
+	Message string   `json:"message"`
+	Path    []string `json:"path"`
+}
+
+func (InvalidCredentialsError) IsError()                     {}
+func (InvalidCredentialsError) IsLoginWithCredentialsError() {}
+
+type LoginTokenPayload struct {
+	AccessToken *string    `json:"access_token"`
+	ExpiredAt   *time.Time `json:"expired_at"`
+}
+
+type LoginWithCredentialsInput struct {
+	Credentials *Credentials                `json:"credentials"`
+	Device      *AuthenticatingDeviceInput  `json:"device"`
+	Browser     *AuthenticatingBrowserInput `json:"browser"`
+}
+
+type LoginWithCredentialsPayload struct {
+	Errors []LoginWithCredentialsError `json:"errors"`
+	Token  *LoginTokenPayload          `json:"token"`
+}
+
+type LoginWithProviderInput struct {
+	Credentials *ProviderCredentialsInput `json:"credentials"`
+}
+
+type LoginWithProviderPayload struct {
+	Errors []LoginWithCredentialsError `json:"errors"`
+	Token  *LoginTokenPayload          `json:"token"`
 }
 
 type MetadataValidationError struct {
@@ -88,86 +128,55 @@ type PaginationInput struct {
 	Last   *int        `json:"last"`
 }
 
-type PlayerFilter struct {
-	Search *string `json:"search"`
-	Online *bool   `json:"online"`
+// Returned when authentication is not allowed via password. This is typically the case when a password has been remoed from
+// the user or the user has chosen to login with a social provider and never set a password.
+type PasswordNotAllowedError struct {
+	Message string   `json:"message"`
+	Path    []string `json:"path"`
 }
 
-type PlayerIdentifierConstraintInput struct {
-	Type       string `json:"type"`
-	Identifier string `json:"identifier"`
+func (PasswordNotAllowedError) IsError()                     {}
+func (PasswordNotAllowedError) IsLoginWithCredentialsError() {}
+
+// This error is presented when the access token for the provider cannot be validated or has expired.
+type ProviderAccessTokenError struct {
+	Message string   `json:"message"`
+	Path    []string `json:"path"`
 }
 
-// Register a User using the provided creentials and name.
-type RegisterInput struct {
-	Name     string `json:"name"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
+func (ProviderAccessTokenError) IsRegisterWithProviderErrors() {}
+func (ProviderAccessTokenError) IsError()                      {}
+
+type ProviderCredentialsInput struct {
+	Provider    int    `json:"provider"`
+	AccessToken string `json:"access_token"`
 }
 
-// Returned when performing `register` mutation. An access_token will be returned when `registered` is true, no
-// errors are present, and `pending` is false. If `pending` returns true the user must wait to be approved before
-// being able to login to Response.
-//
-// The user may subscribe to the `userActivated` subscription with the ID returned in the `user` object to be
-// notified when the account is activated.
-type RegisterResult struct {
-	AccessToken *string   `json:"access_token"`
-	Registered  bool      `json:"registered"`
-	Activated   bool      `json:"activated"`
-	User        *ent.User `json:"user"`
+type RegisterWithCredentialsInput struct {
+	Name        string       `json:"name"`
+	Credentials *Credentials `json:"credentials"`
 }
 
-type UpdateMapLayerInput struct {
-	MapType     *int    `json:"map_type"`
-	Name        *string `json:"name"`
-	URLTemplate *string `json:"url_template"`
-	IsPublic    *bool   `json:"is_public"`
+type RegisterWithCredentialsPayload struct {
+	Success bool                           `json:"success"`
+	Errors  []RegisterWithCredentialsError `json:"errors"`
 }
 
-type UpdateMapTypeInput struct {
-	Name    *string  `json:"name"`
-	MinZoom *int     `json:"min_zoom"`
-	MaxZoom *int     `json:"max_zoom"`
-	MinX    *float64 `json:"min_x"`
-	MinY    *float64 `json:"min_y"`
-	MaxX    *float64 `json:"max_x"`
-	MaxY    *float64 `json:"max_y"`
+type RegisterWithProviderInput struct {
+	Credentials *ProviderCredentialsInput `json:"credentials"`
 }
 
-type UpdateServerInput struct {
-	ServerType  *int    `json:"server_type"`
-	MapType     *int    `json:"map_type"`
-	Name        *string `json:"name"`
-	APIUsername *string `json:"api_username"`
-	APIPort     *string `json:"api_port"`
-	APIAddress  *string `json:"api_address"`
-	APISecret   *string `json:"api_secret"`
+type RegisterWithProviderPayload struct {
+	Success bool                         `json:"success"`
+	Errors  []RegisterWithProviderErrors `json:"errors"`
 }
 
-type UpsertPlayerIdentifierInput struct {
-	Type       string `json:"type"`
-	Identifier string `json:"identifier"`
-}
-
-type UpsertPlayerInput struct {
-	Name        string                         `json:"name"`
-	AddMinutes  int                            `json:"add_minutes"`
-	Identifiers []*UpsertPlayerIdentifierInput `json:"identifiers"`
-}
-
-// Returned when the userActivated subcription triggers.
-type UserActivatedResult struct {
-	Activated   bool      `json:"activated"`
-	ActivatedBy *ent.User `json:"activated_by"`
-	Comments    *string   `json:"comments"`
+type SearchInput struct {
+	Query string `json:"query"`
 }
 
 type UserFilter struct {
-	Name      *string `json:"name"`
-	NameLike  *string `json:"name_like"`
-	Email     *string `json:"email"`
-	EmailLike *string `json:"email_like"`
-	Activated *bool   `json:"activated"`
-	Disabled  *bool   `json:"disabled"`
+	Active   *bool        `json:"active"`
+	Disabled *bool        `json:"disabled"`
+	Search   *SearchInput `json:"search"`
 }

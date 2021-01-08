@@ -1,0 +1,57 @@
+extend type Mutation {
+  registerWithCredentials(
+    input: RegisterWithCredentialsInput!
+  ): RegisterWithCredentialsPayload!
+
+  registerWithProvider(
+    input: RegisterWithProviderInput!
+  ): RegisterWithProviderPayload!
+}
+
+### registerWithCredentials
+
+union RegisterWithCredentialsError =
+    EmailAlreadyExistsError
+  | InputIsInvalidError
+
+"This error is presented when the email provided belongs to an existing account."
+type EmailAlreadyExistsError implements Error {
+  message: String!
+  path: [String!]
+}
+
+input RegisterWithCredentialsInput {
+  name: String!
+  credentials: Credentials!
+}
+
+type RegisterWithCredentialsPayload {
+  success: Boolean!
+  errors: [RegisterWithCredentialsError!]
+}
+
+### registerWithProvider
+
+union RegisterWithProviderErrors =
+    InputIsInvalidError
+  | ProviderAccessTokenError
+
+"This error is presented when the access token for the provider cannot be validated or has expired."
+type ProviderAccessTokenError implements Error {
+  message: String!
+  path: [String!]
+}
+
+input ProviderCredentialsInput {
+  provider: ID!
+  access_token: String!
+}
+
+input RegisterWithProviderInput {
+  credentials: ProviderCredentialsInput!
+}
+
+type RegisterWithProviderPayload {
+  success: Boolean!
+  errors: [RegisterWithProviderErrors!]
+}

@@ -50,7 +50,7 @@ func (User) Mixin() []ent.Mixin {
 // Edges of the User.
 func (User) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("session_tokens", SessionToken.Type).
+		edge.To("sessions", Session.Type).
 			Annotations(entgql.Bind()),
 		edge.From("activation", Activation.Type).
 			Ref("user").

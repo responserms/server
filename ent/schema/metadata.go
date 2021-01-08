@@ -22,9 +22,6 @@ func (Metadata) Fields() []ent.Field {
 // Edges of the Metadata.
 func (Metadata) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("schema", MetadataSchema.Type).
-			Unique(),
-
 		// Back-references to various metadata-supporting entities
 		edge.From("user", User.Type).
 			Ref("metadata").

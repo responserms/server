@@ -1,0 +1,76 @@
+extend type Mutation {
+  """
+  Authenticate a user using their credentials. This is intended to be used by first-party applications in the Response ecosystem. This
+  mutation is considered unstable and may change at any time. You've been warned!
+  """
+  loginWithCredentials(
+    input: LoginWithCredentialsInput!
+  ): LoginWithCredentialsPayload!
+
+  """
+  Authenticate a user using a configured social provider. This is intended to be used
+  """
+  loginWithProvider(input: LoginWithProviderInput!): LoginWithProviderPayload!
+}
+
+### loginWithCredentials
+
+"""
+Returned when the credentials provided are invalid. This could mean the email is not registered or the password does not
+match the provided email address.
+"""
+type InvalidCredentialsError implements Error {
+  message: String!
+  path: [String!]
+}
+
+"""
+Returned when authentication is not allowed via password. This is typically the case when a password has been remoed from
+the user or the user has chosen to login with a social provider and never set a password.
+"""
+type PasswordNotAllowedError implements Error {
+  message: String!
+  path: [String!]
+}
+
+union LoginWithCredentialsError =
+    InvalidCredentialsError
+  | PasswordNotAllowedError
+  | InputIsInvalidError
+
+input AuthenticatingDeviceInput {
+  operatingSystem: String!
+  type: String!
+}
+
+input AuthenticatingBrowserInput {
+  name: String!
+  version: String!
+}
+
+input LoginWithCredentialsInput {
+  credentials: Credentials!
+  device: AuthenticatingDeviceInput!
+  browser: AuthenticatingBrowserInput!
+}
+
+type LoginTokenPayload {
+  access_token: String
+  expired_at: Time
+}
+
+type LoginWithCredentialsPayload {
+  errors: [LoginWithCredentialsError!]
+  token: LoginTokenPayload
+}
+
+### loginWithProvider
+
+input LoginWithProviderInput {
+  credentials: ProviderCredentialsInput!
+}
+
+type LoginWithProviderPayload {
+  errors: [LoginWithCredentialsError!]
+  token: LoginTokenPayload
+}

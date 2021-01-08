@@ -113,18 +113,6 @@ func (m *MetadataQuery) collectField(ctx *graphql.OperationContext, field graphq
 }
 
 // CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
-func (ms *MetadataSchemaQuery) CollectFields(ctx context.Context, satisfies ...string) *MetadataSchemaQuery {
-	if fc := graphql.GetFieldContext(ctx); fc != nil {
-		ms = ms.collectField(graphql.GetOperationContext(ctx), fc.Field, satisfies...)
-	}
-	return ms
-}
-
-func (ms *MetadataSchemaQuery) collectField(ctx *graphql.OperationContext, field graphql.CollectedField, satisfies ...string) *MetadataSchemaQuery {
-	return ms
-}
-
-// CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
 func (pl *PlayerQuery) CollectFields(ctx context.Context, satisfies ...string) *PlayerQuery {
 	if fc := graphql.GetFieldContext(ctx); fc != nil {
 		pl = pl.collectField(graphql.GetOperationContext(ctx), fc.Field, satisfies...)
@@ -221,23 +209,47 @@ func (st *ServerTypeQuery) collectField(ctx *graphql.OperationContext, field gra
 }
 
 // CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
-func (st *SessionTokenQuery) CollectFields(ctx context.Context, satisfies ...string) *SessionTokenQuery {
+func (s *SessionQuery) CollectFields(ctx context.Context, satisfies ...string) *SessionQuery {
 	if fc := graphql.GetFieldContext(ctx); fc != nil {
-		st = st.collectField(graphql.GetOperationContext(ctx), fc.Field, satisfies...)
+		s = s.collectField(graphql.GetOperationContext(ctx), fc.Field, satisfies...)
 	}
-	return st
+	return s
 }
 
-func (st *SessionTokenQuery) collectField(ctx *graphql.OperationContext, field graphql.CollectedField, satisfies ...string) *SessionTokenQuery {
+func (s *SessionQuery) collectField(ctx *graphql.OperationContext, field graphql.CollectedField, satisfies ...string) *SessionQuery {
 	for _, field := range graphql.CollectFields(ctx, field.Selections, satisfies) {
 		switch field.Name {
+		case "token":
+			s = s.WithToken(func(query *TokenQuery) {
+				query.collectField(ctx, field)
+			})
 		case "user":
-			st = st.WithUser(func(query *UserQuery) {
+			s = s.WithUser(func(query *UserQuery) {
 				query.collectField(ctx, field)
 			})
 		}
 	}
-	return st
+	return s
+}
+
+// CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
+func (t *TokenQuery) CollectFields(ctx context.Context, satisfies ...string) *TokenQuery {
+	if fc := graphql.GetFieldContext(ctx); fc != nil {
+		t = t.collectField(graphql.GetOperationContext(ctx), fc.Field, satisfies...)
+	}
+	return t
+}
+
+func (t *TokenQuery) collectField(ctx *graphql.OperationContext, field graphql.CollectedField, satisfies ...string) *TokenQuery {
+	for _, field := range graphql.CollectFields(ctx, field.Selections, satisfies) {
+		switch field.Name {
+		case "session":
+			t = t.WithSession(func(query *SessionQuery) {
+				query.collectField(ctx, field)
+			})
+		}
+	}
+	return t
 }
 
 // CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
@@ -263,8 +275,8 @@ func (u *UserQuery) collectField(ctx *graphql.OperationContext, field graphql.Co
 			u = u.WithPlayers(func(query *PlayerQuery) {
 				query.collectField(ctx, field)
 			})
-		case "session_tokens":
-			u = u.WithSessionTokens(func(query *SessionTokenQuery) {
+		case "sessions":
+			u = u.WithSessions(func(query *SessionQuery) {
 				query.collectField(ctx, field)
 			})
 		}

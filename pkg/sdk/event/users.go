@@ -10,7 +10,7 @@ import (
 	"fmt"
 
 	"github.com/responserms/server/ent"
-	"github.com/responserms/server/internal/events"
+	"github.com/responserms/server/internal/services/events"
 )
 
 // AnyUserRegistered should be emitted whenever a User first registers for Response. The message

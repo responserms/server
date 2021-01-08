@@ -11,7 +11,6 @@ import (
 	"github.com/facebook/ent/schema/field"
 	"github.com/responserms/server/ent/maptype"
 	"github.com/responserms/server/ent/metadata"
-	"github.com/responserms/server/ent/metadataschema"
 	"github.com/responserms/server/ent/user"
 )
 
@@ -26,25 +25,6 @@ type MetadataCreate struct {
 func (mc *MetadataCreate) SetData(m map[string]interface{}) *MetadataCreate {
 	mc.mutation.SetData(m)
 	return mc
-}
-
-// SetSchemaID sets the schema edge to MetadataSchema by id.
-func (mc *MetadataCreate) SetSchemaID(id int) *MetadataCreate {
-	mc.mutation.SetSchemaID(id)
-	return mc
-}
-
-// SetNillableSchemaID sets the schema edge to MetadataSchema by id if the given value is not nil.
-func (mc *MetadataCreate) SetNillableSchemaID(id *int) *MetadataCreate {
-	if id != nil {
-		mc = mc.SetSchemaID(*id)
-	}
-	return mc
-}
-
-// SetSchema sets the schema edge to MetadataSchema.
-func (mc *MetadataCreate) SetSchema(m *MetadataSchema) *MetadataCreate {
-	return mc.SetSchemaID(m.ID)
 }
 
 // SetUserID sets the user edge to User by id.
@@ -173,25 +153,6 @@ func (mc *MetadataCreate) createSpec() (*Metadata, *sqlgraph.CreateSpec) {
 			Column: metadata.FieldData,
 		})
 		_node.Data = value
-	}
-	if nodes := mc.mutation.SchemaIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   metadata.SchemaTable,
-			Columns: []string{metadata.SchemaColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: metadataschema.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := mc.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

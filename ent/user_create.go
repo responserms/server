@@ -13,7 +13,7 @@ import (
 	"github.com/responserms/server/ent/activation"
 	"github.com/responserms/server/ent/metadata"
 	"github.com/responserms/server/ent/player"
-	"github.com/responserms/server/ent/sessiontoken"
+	"github.com/responserms/server/ent/session"
 	"github.com/responserms/server/ent/user"
 )
 
@@ -167,19 +167,19 @@ func (uc *UserCreate) SetMetadata(m *Metadata) *UserCreate {
 	return uc.SetMetadataID(m.ID)
 }
 
-// AddSessionTokenIDs adds the session_tokens edge to SessionToken by ids.
-func (uc *UserCreate) AddSessionTokenIDs(ids ...int) *UserCreate {
-	uc.mutation.AddSessionTokenIDs(ids...)
+// AddSessionIDs adds the sessions edge to Session by ids.
+func (uc *UserCreate) AddSessionIDs(ids ...int) *UserCreate {
+	uc.mutation.AddSessionIDs(ids...)
 	return uc
 }
 
-// AddSessionTokens adds the session_tokens edges to SessionToken.
-func (uc *UserCreate) AddSessionTokens(s ...*SessionToken) *UserCreate {
+// AddSessions adds the sessions edges to Session.
+func (uc *UserCreate) AddSessions(s ...*Session) *UserCreate {
 	ids := make([]int, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
-	return uc.AddSessionTokenIDs(ids...)
+	return uc.AddSessionIDs(ids...)
 }
 
 // SetActivationID sets the activation edge to Activation by id.
@@ -440,17 +440,17 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := uc.mutation.SessionTokensIDs(); len(nodes) > 0 {
+	if nodes := uc.mutation.SessionsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.SessionTokensTable,
-			Columns: []string{user.SessionTokensColumn},
+			Table:   user.SessionsTable,
+			Columns: []string{user.SessionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: sessiontoken.FieldID,
+					Column: session.FieldID,
 				},
 			},
 		}

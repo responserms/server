@@ -34,8 +34,8 @@ const (
 
 	// EdgeMetadata holds the string denoting the metadata edge name in mutations.
 	EdgeMetadata = "metadata"
-	// EdgeSessionTokens holds the string denoting the session_tokens edge name in mutations.
-	EdgeSessionTokens = "session_tokens"
+	// EdgeSessions holds the string denoting the sessions edge name in mutations.
+	EdgeSessions = "sessions"
 	// EdgeActivation holds the string denoting the activation edge name in mutations.
 	EdgeActivation = "activation"
 	// EdgeActivations holds the string denoting the activations edge name in mutations.
@@ -52,13 +52,13 @@ const (
 	MetadataInverseTable = "metadata"
 	// MetadataColumn is the table column denoting the metadata relation/edge.
 	MetadataColumn = "user_metadata"
-	// SessionTokensTable is the table the holds the session_tokens relation/edge.
-	SessionTokensTable = "session_tokens"
-	// SessionTokensInverseTable is the table name for the SessionToken entity.
-	// It exists in this package in order to avoid circular dependency with the "sessiontoken" package.
-	SessionTokensInverseTable = "session_tokens"
-	// SessionTokensColumn is the table column denoting the session_tokens relation/edge.
-	SessionTokensColumn = "user_session_tokens"
+	// SessionsTable is the table the holds the sessions relation/edge.
+	SessionsTable = "sessions"
+	// SessionsInverseTable is the table name for the Session entity.
+	// It exists in this package in order to avoid circular dependency with the "session" package.
+	SessionsInverseTable = "sessions"
+	// SessionsColumn is the table column denoting the sessions relation/edge.
+	SessionsColumn = "user_sessions"
 	// ActivationTable is the table the holds the activation relation/edge.
 	ActivationTable = "users"
 	// ActivationInverseTable is the table name for the Activation entity.

@@ -1,0 +1,10 @@
+interface Node {
+  id: ID!
+}
+
+# Error is implemented by all errors throughout the system and the message returned is considered
+# to be safe for end-users to understand the problem.
+interface Error {
+  message: String!
+  path: [String!]
+}

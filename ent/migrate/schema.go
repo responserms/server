@@ -92,7 +92,6 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "data", Type: field.TypeJSON},
 		{Name: "map_type_metadata", Type: field.TypeInt, Unique: true, Nullable: true},
-		{Name: "metadata_schema", Type: field.TypeInt, Nullable: true},
 		{Name: "user_metadata", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
 	// MetadataTable holds the schema information for the "metadata" table.
@@ -109,36 +108,13 @@ var (
 				OnDelete:   schema.SetNull,
 			},
 			{
-				Symbol:  "metadata_metadata_schemas_schema",
-				Columns: []*schema.Column{MetadataColumns[3]},
-
-				RefColumns: []*schema.Column{MetadataSchemasColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-			{
 				Symbol:  "metadata_users_metadata",
-				Columns: []*schema.Column{MetadataColumns[4]},
+				Columns: []*schema.Column{MetadataColumns[3]},
 
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 		},
-	}
-	// MetadataSchemasColumns holds the columns for the "metadata_schemas" table.
-	MetadataSchemasColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "name", Type: field.TypeString},
-		{Name: "about", Type: field.TypeString, Nullable: true, Size: 2147483647},
-		{Name: "schema", Type: field.TypeJSON},
-	}
-	// MetadataSchemasTable holds the schema information for the "metadata_schemas" table.
-	MetadataSchemasTable = &schema.Table{
-		Name:        "metadata_schemas",
-		Columns:     MetadataSchemasColumns,
-		PrimaryKey:  []*schema.Column{MetadataSchemasColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
 	}
 	// PlayersColumns holds the columns for the "players" table.
 	PlayersColumns = []*schema.Column{
@@ -271,29 +247,55 @@ var (
 		PrimaryKey:  []*schema.Column{ServerTypesColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{},
 	}
-	// SessionTokensColumns holds the columns for the "session_tokens" table.
-	SessionTokensColumns = []*schema.Column{
+	// SessionsColumns holds the columns for the "sessions" table.
+	SessionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "blocked_at", Type: field.TypeTime, Nullable: true},
-		{Name: "expired_at", Type: field.TypeTime, Nullable: true},
-		{Name: "user_session_tokens", Type: field.TypeInt, Nullable: true},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
+		{Name: "ip_address", Type: field.TypeString},
+		{Name: "browser_name", Type: field.TypeString},
+		{Name: "browser_version", Type: field.TypeString},
+		{Name: "device_os", Type: field.TypeString},
+		{Name: "device_type", Type: field.TypeString},
+		{Name: "claims", Type: field.TypeString, Size: 2147483647},
+		{Name: "terminated_at", Type: field.TypeTime},
+		{Name: "token_session", Type: field.TypeInt, Unique: true, Nullable: true},
+		{Name: "user_sessions", Type: field.TypeInt, Nullable: true},
 	}
-	// SessionTokensTable holds the schema information for the "session_tokens" table.
-	SessionTokensTable = &schema.Table{
-		Name:       "session_tokens",
-		Columns:    SessionTokensColumns,
-		PrimaryKey: []*schema.Column{SessionTokensColumns[0]},
+	// SessionsTable holds the schema information for the "sessions" table.
+	SessionsTable = &schema.Table{
+		Name:       "sessions",
+		Columns:    SessionsColumns,
+		PrimaryKey: []*schema.Column{SessionsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:  "session_tokens_users_session_tokens",
-				Columns: []*schema.Column{SessionTokensColumns[5]},
+				Symbol:  "sessions_tokens_session",
+				Columns: []*schema.Column{SessionsColumns[10]},
+
+				RefColumns: []*schema.Column{TokensColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:  "sessions_users_sessions",
+				Columns: []*schema.Column{SessionsColumns[11]},
 
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 		},
+	}
+	// TokensColumns holds the columns for the "tokens" table.
+	TokensColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "expired_at", Type: field.TypeTime},
+		{Name: "blocked_at", Type: field.TypeTime},
+	}
+	// TokensTable holds the schema information for the "tokens" table.
+	TokensTable = &schema.Table{
+		Name:        "tokens",
+		Columns:     TokensColumns,
+		PrimaryKey:  []*schema.Column{TokensColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{},
 	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
@@ -386,12 +388,12 @@ var (
 		MapLayersTable,
 		MapTypesTable,
 		MetadataTable,
-		MetadataSchemasTable,
 		PlayersTable,
 		PlayerIdentifiersTable,
 		ServersTable,
 		ServerTypesTable,
-		SessionTokensTable,
+		SessionsTable,
+		TokensTable,
 		UsersTable,
 		ActivationActorTable,
 		PlayerServersTable,
@@ -402,8 +404,7 @@ func init() {
 	MapLayersTable.ForeignKeys[0].RefTable = MetadataTable
 	MapLayersTable.ForeignKeys[1].RefTable = MapTypesTable
 	MetadataTable.ForeignKeys[0].RefTable = MapTypesTable
-	MetadataTable.ForeignKeys[1].RefTable = MetadataSchemasTable
-	MetadataTable.ForeignKeys[2].RefTable = UsersTable
+	MetadataTable.ForeignKeys[1].RefTable = UsersTable
 	PlayersTable.ForeignKeys[0].RefTable = MetadataTable
 	PlayersTable.ForeignKeys[1].RefTable = UsersTable
 	PlayerIdentifiersTable.ForeignKeys[0].RefTable = MetadataTable
@@ -411,7 +412,8 @@ func init() {
 	ServersTable.ForeignKeys[0].RefTable = MetadataTable
 	ServersTable.ForeignKeys[1].RefTable = ServerTypesTable
 	ServersTable.ForeignKeys[2].RefTable = MapTypesTable
-	SessionTokensTable.ForeignKeys[0].RefTable = UsersTable
+	SessionsTable.ForeignKeys[0].RefTable = TokensTable
+	SessionsTable.ForeignKeys[1].RefTable = UsersTable
 	UsersTable.ForeignKeys[0].RefTable = ActivationsTable
 	ActivationActorTable.ForeignKeys[0].RefTable = ActivationsTable
 	ActivationActorTable.ForeignKeys[1].RefTable = UsersTable

@@ -74,19 +74,6 @@ func (f MetadataFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, er
 	return f(ctx, mv)
 }
 
-// The MetadataSchemaFunc type is an adapter to allow the use of ordinary
-// function as MetadataSchema mutator.
-type MetadataSchemaFunc func(context.Context, *ent.MetadataSchemaMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f MetadataSchemaFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.MetadataSchemaMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.MetadataSchemaMutation", m)
-	}
-	return f(ctx, mv)
-}
-
 // The PlayerFunc type is an adapter to allow the use of ordinary
 // function as Player mutator.
 type PlayerFunc func(context.Context, *ent.PlayerMutation) (ent.Value, error)
@@ -139,15 +126,28 @@ func (f ServerTypeFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, 
 	return f(ctx, mv)
 }
 
-// The SessionTokenFunc type is an adapter to allow the use of ordinary
-// function as SessionToken mutator.
-type SessionTokenFunc func(context.Context, *ent.SessionTokenMutation) (ent.Value, error)
+// The SessionFunc type is an adapter to allow the use of ordinary
+// function as Session mutator.
+type SessionFunc func(context.Context, *ent.SessionMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f SessionTokenFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.SessionTokenMutation)
+func (f SessionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.SessionMutation)
 	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SessionTokenMutation", m)
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SessionMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The TokenFunc type is an adapter to allow the use of ordinary
+// function as Token mutator.
+type TokenFunc func(context.Context, *ent.TokenMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f TokenFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.TokenMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TokenMutation", m)
 	}
 	return f(ctx, mv)
 }

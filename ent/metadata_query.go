@@ -13,7 +13,6 @@ import (
 	"github.com/facebook/ent/schema/field"
 	"github.com/responserms/server/ent/maptype"
 	"github.com/responserms/server/ent/metadata"
-	"github.com/responserms/server/ent/metadataschema"
 	"github.com/responserms/server/ent/predicate"
 	"github.com/responserms/server/ent/user"
 )
@@ -27,7 +26,6 @@ type MetadataQuery struct {
 	fields     []string
 	predicates []predicate.Metadata
 	// eager-loading edges.
-	withSchema  *MetadataSchemaQuery
 	withUser    *UserQuery
 	withMapType *MapTypeQuery
 	withFKs     bool
@@ -58,28 +56,6 @@ func (mq *MetadataQuery) Offset(offset int) *MetadataQuery {
 func (mq *MetadataQuery) Order(o ...OrderFunc) *MetadataQuery {
 	mq.order = append(mq.order, o...)
 	return mq
-}
-
-// QuerySchema chains the current query on the schema edge.
-func (mq *MetadataQuery) QuerySchema() *MetadataSchemaQuery {
-	query := &MetadataSchemaQuery{config: mq.config}
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := mq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := mq.sqlQuery()
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(metadata.Table, metadata.FieldID, selector),
-			sqlgraph.To(metadataschema.Table, metadataschema.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, metadata.SchemaTable, metadata.SchemaColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(mq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
 }
 
 // QueryUser chains the current query on the user edge.
@@ -301,24 +277,12 @@ func (mq *MetadataQuery) Clone() *MetadataQuery {
 		offset:      mq.offset,
 		order:       append([]OrderFunc{}, mq.order...),
 		predicates:  append([]predicate.Metadata{}, mq.predicates...),
-		withSchema:  mq.withSchema.Clone(),
 		withUser:    mq.withUser.Clone(),
 		withMapType: mq.withMapType.Clone(),
 		// clone intermediate query.
 		sql:  mq.sql.Clone(),
 		path: mq.path,
 	}
-}
-
-//  WithSchema tells the query-builder to eager-loads the nodes that are connected to
-// the "schema" edge. The optional arguments used to configure the query builder of the edge.
-func (mq *MetadataQuery) WithSchema(opts ...func(*MetadataSchemaQuery)) *MetadataQuery {
-	query := &MetadataSchemaQuery{config: mq.config}
-	for _, opt := range opts {
-		opt(query)
-	}
-	mq.withSchema = query
-	return mq
 }
 
 //  WithUser tells the query-builder to eager-loads the nodes that are connected to
@@ -408,13 +372,12 @@ func (mq *MetadataQuery) sqlAll(ctx context.Context) ([]*Metadata, error) {
 		nodes       = []*Metadata{}
 		withFKs     = mq.withFKs
 		_spec       = mq.querySpec()
-		loadedTypes = [3]bool{
-			mq.withSchema != nil,
+		loadedTypes = [2]bool{
 			mq.withUser != nil,
 			mq.withMapType != nil,
 		}
 	)
-	if mq.withSchema != nil || mq.withUser != nil || mq.withMapType != nil {
+	if mq.withUser != nil || mq.withMapType != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -438,31 +401,6 @@ func (mq *MetadataQuery) sqlAll(ctx context.Context) ([]*Metadata, error) {
 	}
 	if len(nodes) == 0 {
 		return nodes, nil
-	}
-
-	if query := mq.withSchema; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*Metadata)
-		for i := range nodes {
-			if fk := nodes[i].metadata_schema; fk != nil {
-				ids = append(ids, *fk)
-				nodeids[*fk] = append(nodeids[*fk], nodes[i])
-			}
-		}
-		query.Where(metadataschema.IDIn(ids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "metadata_schema" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.Schema = n
-			}
-		}
 	}
 
 	if query := mq.withUser; query != nil {

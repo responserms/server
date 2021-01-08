@@ -11,7 +11,6 @@ import (
 	"github.com/facebook/ent/schema/field"
 	"github.com/responserms/server/ent/maptype"
 	"github.com/responserms/server/ent/metadata"
-	"github.com/responserms/server/ent/metadataschema"
 	"github.com/responserms/server/ent/predicate"
 	"github.com/responserms/server/ent/user"
 )
@@ -33,25 +32,6 @@ func (mu *MetadataUpdate) Where(ps ...predicate.Metadata) *MetadataUpdate {
 func (mu *MetadataUpdate) SetData(m map[string]interface{}) *MetadataUpdate {
 	mu.mutation.SetData(m)
 	return mu
-}
-
-// SetSchemaID sets the schema edge to MetadataSchema by id.
-func (mu *MetadataUpdate) SetSchemaID(id int) *MetadataUpdate {
-	mu.mutation.SetSchemaID(id)
-	return mu
-}
-
-// SetNillableSchemaID sets the schema edge to MetadataSchema by id if the given value is not nil.
-func (mu *MetadataUpdate) SetNillableSchemaID(id *int) *MetadataUpdate {
-	if id != nil {
-		mu = mu.SetSchemaID(*id)
-	}
-	return mu
-}
-
-// SetSchema sets the schema edge to MetadataSchema.
-func (mu *MetadataUpdate) SetSchema(m *MetadataSchema) *MetadataUpdate {
-	return mu.SetSchemaID(m.ID)
 }
 
 // SetUserID sets the user edge to User by id.
@@ -95,12 +75,6 @@ func (mu *MetadataUpdate) SetMapType(m *MapType) *MetadataUpdate {
 // Mutation returns the MetadataMutation object of the builder.
 func (mu *MetadataUpdate) Mutation() *MetadataMutation {
 	return mu.mutation
-}
-
-// ClearSchema clears the "schema" edge to type MetadataSchema.
-func (mu *MetadataUpdate) ClearSchema() *MetadataUpdate {
-	mu.mutation.ClearSchema()
-	return mu
 }
 
 // ClearUser clears the "user" edge to type User.
@@ -190,41 +164,6 @@ func (mu *MetadataUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Value:  value,
 			Column: metadata.FieldData,
 		})
-	}
-	if mu.mutation.SchemaCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   metadata.SchemaTable,
-			Columns: []string{metadata.SchemaColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: metadataschema.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := mu.mutation.SchemaIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   metadata.SchemaTable,
-			Columns: []string{metadata.SchemaColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: metadataschema.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if mu.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -320,25 +259,6 @@ func (muo *MetadataUpdateOne) SetData(m map[string]interface{}) *MetadataUpdateO
 	return muo
 }
 
-// SetSchemaID sets the schema edge to MetadataSchema by id.
-func (muo *MetadataUpdateOne) SetSchemaID(id int) *MetadataUpdateOne {
-	muo.mutation.SetSchemaID(id)
-	return muo
-}
-
-// SetNillableSchemaID sets the schema edge to MetadataSchema by id if the given value is not nil.
-func (muo *MetadataUpdateOne) SetNillableSchemaID(id *int) *MetadataUpdateOne {
-	if id != nil {
-		muo = muo.SetSchemaID(*id)
-	}
-	return muo
-}
-
-// SetSchema sets the schema edge to MetadataSchema.
-func (muo *MetadataUpdateOne) SetSchema(m *MetadataSchema) *MetadataUpdateOne {
-	return muo.SetSchemaID(m.ID)
-}
-
 // SetUserID sets the user edge to User by id.
 func (muo *MetadataUpdateOne) SetUserID(id int) *MetadataUpdateOne {
 	muo.mutation.SetUserID(id)
@@ -380,12 +300,6 @@ func (muo *MetadataUpdateOne) SetMapType(m *MapType) *MetadataUpdateOne {
 // Mutation returns the MetadataMutation object of the builder.
 func (muo *MetadataUpdateOne) Mutation() *MetadataMutation {
 	return muo.mutation
-}
-
-// ClearSchema clears the "schema" edge to type MetadataSchema.
-func (muo *MetadataUpdateOne) ClearSchema() *MetadataUpdateOne {
-	muo.mutation.ClearSchema()
-	return muo
 }
 
 // ClearUser clears the "user" edge to type User.
@@ -473,41 +387,6 @@ func (muo *MetadataUpdateOne) sqlSave(ctx context.Context) (_node *Metadata, err
 			Value:  value,
 			Column: metadata.FieldData,
 		})
-	}
-	if muo.mutation.SchemaCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   metadata.SchemaTable,
-			Columns: []string{metadata.SchemaColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: metadataschema.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := muo.mutation.SchemaIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   metadata.SchemaTable,
-			Columns: []string{metadata.SchemaColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: metadataschema.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if muo.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{

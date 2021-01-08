@@ -1134,25 +1134,25 @@ func HasMetadataWith(preds ...predicate.Metadata) predicate.User {
 	})
 }
 
-// HasSessionTokens applies the HasEdge predicate on the "session_tokens" edge.
-func HasSessionTokens() predicate.User {
+// HasSessions applies the HasEdge predicate on the "sessions" edge.
+func HasSessions() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(SessionTokensTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, SessionTokensTable, SessionTokensColumn),
+			sqlgraph.To(SessionsTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, SessionsTable, SessionsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasSessionTokensWith applies the HasEdge predicate on the "session_tokens" edge with a given conditions (other predicates).
-func HasSessionTokensWith(preds ...predicate.SessionToken) predicate.User {
+// HasSessionsWith applies the HasEdge predicate on the "sessions" edge with a given conditions (other predicates).
+func HasSessionsWith(preds ...predicate.Session) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(SessionTokensInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, SessionTokensTable, SessionTokensColumn),
+			sqlgraph.To(SessionsInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, SessionsTable, SessionsColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

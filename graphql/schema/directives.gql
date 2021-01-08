@@ -1,4 +1,3 @@
-
 "@hasPermission checks that the authenticated token (not User) has the defined permission."
 directive @hasPermission(permission: String!) on FIELD_DEFINITION
 
@@ -8,18 +7,19 @@ directive @hasAnyPermission(permissions: [String!]) on FIELD_DEFINITION
 "@hasAllPermissions checks that the authenticated token (not User) has ALL of the defined permissions."
 directive @hasAllPermissions(permissions: [String!]) on FIELD_DEFINITION
 
-"@isAuthenticated requires that a valid token by provided to access the field."
+"@isAuthenticated requires that a valid token be provided to access the field."
 directive @isAuthenticated on FIELD_DEFINITION | ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
 "@isResourceOwner checks that the user is the resource owner and if so the field is visible, otherwise the field is hidden."
 directive @isResourceOwner on FIELD_DEFINITION | ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-"These are used internally for schema generation and will not be in the final build."
+"Used internally for schema generation and will not be in the final build."
 directive @goModel(
   model: String
   models: [String!]
 ) on OBJECT | INPUT_OBJECT | SCALAR | ENUM | INTERFACE | UNION
 
+"Used internally for schema generation and will not be in the final build."
 directive @goField(
   forceResolver: Boolean
   name: String

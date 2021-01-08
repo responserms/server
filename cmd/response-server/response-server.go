@@ -8,7 +8,7 @@ import (
 	"syscall"
 
 	"github.com/responserms/server/pkg/config"
-	"github.com/responserms/server/server"
+	"github.com/responserms/server/pkg/server"
 	"github.com/urfave/cli/v2"
 )
 
@@ -69,16 +69,14 @@ func handleCommand(ctx *cli.Context) error {
 	// set the log level from the --level flag
 	cfg.SetLogLevelFromStr(ctx.String("level"))
 
-	svr, err := server.New(cfg)
+	svr, err := server.New(ctx.Context, cfg)
 	if err != nil {
 		return err
 	}
 
-	svrContext := ctx.Context
-
 	// Start() is not blocking
 	errChan := make(chan error, 1)
-	svr.Start(svrContext, errChan)
+	svr.Start(ctx.Context, errChan)
 
 	sigs := make(chan os.Signal, 1)
 	stop := make(chan bool, 1)
@@ -105,8 +103,8 @@ func handleCommand(ctx *cli.Context) error {
 
 	<-stop
 
-	if err := svr.Shutdown(svrContext); err != nil {
-		fmt.Printf("failed to shutdown: %s\n", err)
+	if err := svr.Shutdown(ctx.Context); err != nil {
+		return fmt.Errorf("response-server: %w", err)
 	}
 
 	return nil
