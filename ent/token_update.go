@@ -40,6 +40,26 @@ func (tu *TokenUpdate) SetBlockedAt(t time.Time) *TokenUpdate {
 	return tu
 }
 
+// SetNillableBlockedAt sets the blocked_at field if the given value is not nil.
+func (tu *TokenUpdate) SetNillableBlockedAt(t *time.Time) *TokenUpdate {
+	if t != nil {
+		tu.SetBlockedAt(*t)
+	}
+	return tu
+}
+
+// ClearBlockedAt clears the value of blocked_at.
+func (tu *TokenUpdate) ClearBlockedAt() *TokenUpdate {
+	tu.mutation.ClearBlockedAt()
+	return tu
+}
+
+// SetClaims sets the claims field.
+func (tu *TokenUpdate) SetClaims(s string) *TokenUpdate {
+	tu.mutation.SetClaims(s)
+	return tu
+}
+
 // SetSessionID sets the session edge to Session by id.
 func (tu *TokenUpdate) SetSessionID(id int) *TokenUpdate {
 	tu.mutation.SetSessionID(id)
@@ -153,6 +173,19 @@ func (tu *TokenUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: token.FieldBlockedAt,
 		})
 	}
+	if tu.mutation.BlockedAtCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Column: token.FieldBlockedAt,
+		})
+	}
+	if value, ok := tu.mutation.Claims(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: token.FieldClaims,
+		})
+	}
 	if tu.mutation.SessionCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
@@ -215,6 +248,26 @@ func (tuo *TokenUpdateOne) SetExpiredAt(t time.Time) *TokenUpdateOne {
 // SetBlockedAt sets the blocked_at field.
 func (tuo *TokenUpdateOne) SetBlockedAt(t time.Time) *TokenUpdateOne {
 	tuo.mutation.SetBlockedAt(t)
+	return tuo
+}
+
+// SetNillableBlockedAt sets the blocked_at field if the given value is not nil.
+func (tuo *TokenUpdateOne) SetNillableBlockedAt(t *time.Time) *TokenUpdateOne {
+	if t != nil {
+		tuo.SetBlockedAt(*t)
+	}
+	return tuo
+}
+
+// ClearBlockedAt clears the value of blocked_at.
+func (tuo *TokenUpdateOne) ClearBlockedAt() *TokenUpdateOne {
+	tuo.mutation.ClearBlockedAt()
+	return tuo
+}
+
+// SetClaims sets the claims field.
+func (tuo *TokenUpdateOne) SetClaims(s string) *TokenUpdateOne {
+	tuo.mutation.SetClaims(s)
 	return tuo
 }
 
@@ -327,6 +380,19 @@ func (tuo *TokenUpdateOne) sqlSave(ctx context.Context) (_node *Token, err error
 			Type:   field.TypeTime,
 			Value:  value,
 			Column: token.FieldBlockedAt,
+		})
+	}
+	if tuo.mutation.BlockedAtCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Column: token.FieldBlockedAt,
+		})
+	}
+	if value, ok := tuo.mutation.Claims(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: token.FieldClaims,
 		})
 	}
 	if tuo.mutation.SessionCleared() {

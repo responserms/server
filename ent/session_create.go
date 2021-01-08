@@ -80,15 +80,17 @@ func (sc *SessionCreate) SetDeviceType(s string) *SessionCreate {
 	return sc
 }
 
-// SetClaims sets the claims field.
-func (sc *SessionCreate) SetClaims(s string) *SessionCreate {
-	sc.mutation.SetClaims(s)
-	return sc
-}
-
 // SetTerminatedAt sets the terminated_at field.
 func (sc *SessionCreate) SetTerminatedAt(t time.Time) *SessionCreate {
 	sc.mutation.SetTerminatedAt(t)
+	return sc
+}
+
+// SetNillableTerminatedAt sets the terminated_at field if the given value is not nil.
+func (sc *SessionCreate) SetNillableTerminatedAt(t *time.Time) *SessionCreate {
+	if t != nil {
+		sc.SetTerminatedAt(*t)
+	}
 	return sc
 }
 
@@ -215,12 +217,6 @@ func (sc *SessionCreate) check() error {
 	if _, ok := sc.mutation.DeviceType(); !ok {
 		return &ValidationError{Name: "device_type", err: errors.New("ent: missing required field \"device_type\"")}
 	}
-	if _, ok := sc.mutation.Claims(); !ok {
-		return &ValidationError{Name: "claims", err: errors.New("ent: missing required field \"claims\"")}
-	}
-	if _, ok := sc.mutation.TerminatedAt(); !ok {
-		return &ValidationError{Name: "terminated_at", err: errors.New("ent: missing required field \"terminated_at\"")}
-	}
 	return nil
 }
 
@@ -304,21 +300,13 @@ func (sc *SessionCreate) createSpec() (*Session, *sqlgraph.CreateSpec) {
 		})
 		_node.DeviceType = value
 	}
-	if value, ok := sc.mutation.Claims(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: session.FieldClaims,
-		})
-		_node.Claims = value
-	}
 	if value, ok := sc.mutation.TerminatedAt(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
 			Column: session.FieldTerminatedAt,
 		})
-		_node.TerminatedAt = value
+		_node.TerminatedAt = &value
 	}
 	if nodes := sc.mutation.TokenIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

@@ -2,7 +2,6 @@ package core
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
@@ -35,7 +34,7 @@ type (
 		BrowserVersion        string
 		DeviceType            string
 		DeviceOperatingSystem string
-		Claims                *TokenClaims
+		IPAddress             string
 	}
 
 	// TerminateSessionOptions configures the TerminateSession method.
@@ -67,17 +66,12 @@ func (s *sessionsService) CreateSession(ctx context.Context, opts *CreateSession
 		Session.
 		Create()
 
-	claims, err := json.Marshal(opts.Claims)
-	if err != nil {
-		return nil, fmt.Errorf("Sessions.CreateSession: %w", err)
-	}
-
 	session, err := create.SetBrowserName(opts.BrowserName).
 		SetBrowserVersion(opts.BrowserVersion).
 		SetDeviceType(opts.DeviceType).
 		SetDeviceOs(opts.DeviceOperatingSystem).
+		SetIPAddress(opts.IPAddress).
 		SetUserID(opts.UserID).
-		SetClaims(string(claims)).
 		Save(ctx)
 
 	if err != nil {

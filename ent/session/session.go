@@ -25,8 +25,6 @@ const (
 	FieldDeviceOs = "device_os"
 	// FieldDeviceType holds the string denoting the device_type field in the database.
 	FieldDeviceType = "device_type"
-	// FieldClaims holds the string denoting the claims field in the database.
-	FieldClaims = "claims"
 	// FieldTerminatedAt holds the string denoting the terminated_at field in the database.
 	FieldTerminatedAt = "terminated_at"
 
@@ -63,7 +61,6 @@ var Columns = []string{
 	FieldBrowserVersion,
 	FieldDeviceOs,
 	FieldDeviceType,
-	FieldClaims,
 	FieldTerminatedAt,
 }
 

@@ -20,7 +20,9 @@ type Token struct {
 	// ExpiredAt holds the value of the "expired_at" field.
 	ExpiredAt time.Time `json:"expired_at,omitempty"`
 	// BlockedAt holds the value of the "blocked_at" field.
-	BlockedAt time.Time `json:"blocked_at,omitempty"`
+	BlockedAt *time.Time `json:"blocked_at,omitempty"`
+	// Claims holds the value of the "claims" field.
+	Claims string `json:"claims,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TokenQuery when eager-loading is set.
 	Edges TokenEdges `json:"edges"`
@@ -56,6 +58,8 @@ func (*Token) scanValues(columns []string) ([]interface{}, error) {
 		switch columns[i] {
 		case token.FieldID:
 			values[i] = &sql.NullInt64{}
+		case token.FieldClaims:
+			values[i] = &sql.NullString{}
 		case token.FieldExpiredAt, token.FieldBlockedAt:
 			values[i] = &sql.NullTime{}
 		default:
@@ -89,7 +93,14 @@ func (t *Token) assignValues(columns []string, values []interface{}) error {
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field blocked_at", values[i])
 			} else if value.Valid {
-				t.BlockedAt = value.Time
+				t.BlockedAt = new(time.Time)
+				*t.BlockedAt = value.Time
+			}
+		case token.FieldClaims:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field claims", values[i])
+			} else if value.Valid {
+				t.Claims = value.String
 			}
 		}
 	}
@@ -126,8 +137,12 @@ func (t *Token) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v", t.ID))
 	builder.WriteString(", expired_at=")
 	builder.WriteString(t.ExpiredAt.Format(time.ANSIC))
-	builder.WriteString(", blocked_at=")
-	builder.WriteString(t.BlockedAt.Format(time.ANSIC))
+	if v := t.BlockedAt; v != nil {
+		builder.WriteString(", blocked_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", claims=")
+	builder.WriteString(t.Claims)
 	builder.WriteByte(')')
 	return builder.String()
 }

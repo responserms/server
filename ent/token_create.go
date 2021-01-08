@@ -33,6 +33,20 @@ func (tc *TokenCreate) SetBlockedAt(t time.Time) *TokenCreate {
 	return tc
 }
 
+// SetNillableBlockedAt sets the blocked_at field if the given value is not nil.
+func (tc *TokenCreate) SetNillableBlockedAt(t *time.Time) *TokenCreate {
+	if t != nil {
+		tc.SetBlockedAt(*t)
+	}
+	return tc
+}
+
+// SetClaims sets the claims field.
+func (tc *TokenCreate) SetClaims(s string) *TokenCreate {
+	tc.mutation.SetClaims(s)
+	return tc
+}
+
 // SetSessionID sets the session edge to Session by id.
 func (tc *TokenCreate) SetSessionID(id int) *TokenCreate {
 	tc.mutation.SetSessionID(id)
@@ -106,8 +120,8 @@ func (tc *TokenCreate) check() error {
 	if _, ok := tc.mutation.ExpiredAt(); !ok {
 		return &ValidationError{Name: "expired_at", err: errors.New("ent: missing required field \"expired_at\"")}
 	}
-	if _, ok := tc.mutation.BlockedAt(); !ok {
-		return &ValidationError{Name: "blocked_at", err: errors.New("ent: missing required field \"blocked_at\"")}
+	if _, ok := tc.mutation.Claims(); !ok {
+		return &ValidationError{Name: "claims", err: errors.New("ent: missing required field \"claims\"")}
 	}
 	return nil
 }
@@ -150,7 +164,15 @@ func (tc *TokenCreate) createSpec() (*Token, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: token.FieldBlockedAt,
 		})
-		_node.BlockedAt = value
+		_node.BlockedAt = &value
+	}
+	if value, ok := tc.mutation.Claims(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: token.FieldClaims,
+		})
+		_node.Claims = value
 	}
 	if nodes := tc.mutation.SessionIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

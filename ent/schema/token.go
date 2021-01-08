@@ -16,7 +16,10 @@ type Token struct {
 func (Token) Fields() []ent.Field {
 	return []ent.Field{
 		field.Time("expired_at"),
-		field.Time("blocked_at"),
+		field.Time("blocked_at").
+			Optional().
+			Nillable(),
+		field.Text("claims"),
 	}
 }
 

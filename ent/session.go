@@ -32,10 +32,8 @@ type Session struct {
 	DeviceOs string `json:"device_os,omitempty"`
 	// DeviceType holds the value of the "device_type" field.
 	DeviceType string `json:"device_type,omitempty"`
-	// Claims holds the value of the "claims" field.
-	Claims string `json:"claims,omitempty"`
 	// TerminatedAt holds the value of the "terminated_at" field.
-	TerminatedAt time.Time `json:"terminated_at,omitempty"`
+	TerminatedAt *time.Time `json:"terminated_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the SessionQuery when eager-loading is set.
 	Edges         SessionEdges `json:"edges"`
@@ -89,7 +87,7 @@ func (*Session) scanValues(columns []string) ([]interface{}, error) {
 		switch columns[i] {
 		case session.FieldID:
 			values[i] = &sql.NullInt64{}
-		case session.FieldIPAddress, session.FieldBrowserName, session.FieldBrowserVersion, session.FieldDeviceOs, session.FieldDeviceType, session.FieldClaims:
+		case session.FieldIPAddress, session.FieldBrowserName, session.FieldBrowserVersion, session.FieldDeviceOs, session.FieldDeviceType:
 			values[i] = &sql.NullString{}
 		case session.FieldCreateTime, session.FieldUpdateTime, session.FieldTerminatedAt:
 			values[i] = &sql.NullTime{}
@@ -160,17 +158,12 @@ func (s *Session) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				s.DeviceType = value.String
 			}
-		case session.FieldClaims:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field claims", values[i])
-			} else if value.Valid {
-				s.Claims = value.String
-			}
 		case session.FieldTerminatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field terminated_at", values[i])
 			} else if value.Valid {
-				s.TerminatedAt = value.Time
+				s.TerminatedAt = new(time.Time)
+				*s.TerminatedAt = value.Time
 			}
 		case session.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -238,10 +231,10 @@ func (s *Session) String() string {
 	builder.WriteString(s.DeviceOs)
 	builder.WriteString(", device_type=")
 	builder.WriteString(s.DeviceType)
-	builder.WriteString(", claims=")
-	builder.WriteString(s.Claims)
-	builder.WriteString(", terminated_at=")
-	builder.WriteString(s.TerminatedAt.Format(time.ANSIC))
+	if v := s.TerminatedAt; v != nil {
+		builder.WriteString(", terminated_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
 	builder.WriteByte(')')
 	return builder.String()
 }

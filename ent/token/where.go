@@ -107,6 +107,13 @@ func BlockedAt(v time.Time) predicate.Token {
 	})
 }
 
+// Claims applies equality check predicate on the "claims" field. It's identical to ClaimsEQ.
+func Claims(v string) predicate.Token {
+	return predicate.Token(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldClaims), v))
+	})
+}
+
 // ExpiredAtEQ applies the EQ predicate on the "expired_at" field.
 func ExpiredAtEQ(v time.Time) predicate.Token {
 	return predicate.Token(func(s *sql.Selector) {
@@ -256,6 +263,131 @@ func BlockedAtLT(v time.Time) predicate.Token {
 func BlockedAtLTE(v time.Time) predicate.Token {
 	return predicate.Token(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldBlockedAt), v))
+	})
+}
+
+// BlockedAtIsNil applies the IsNil predicate on the "blocked_at" field.
+func BlockedAtIsNil() predicate.Token {
+	return predicate.Token(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldBlockedAt)))
+	})
+}
+
+// BlockedAtNotNil applies the NotNil predicate on the "blocked_at" field.
+func BlockedAtNotNil() predicate.Token {
+	return predicate.Token(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldBlockedAt)))
+	})
+}
+
+// ClaimsEQ applies the EQ predicate on the "claims" field.
+func ClaimsEQ(v string) predicate.Token {
+	return predicate.Token(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldClaims), v))
+	})
+}
+
+// ClaimsNEQ applies the NEQ predicate on the "claims" field.
+func ClaimsNEQ(v string) predicate.Token {
+	return predicate.Token(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldClaims), v))
+	})
+}
+
+// ClaimsIn applies the In predicate on the "claims" field.
+func ClaimsIn(vs ...string) predicate.Token {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Token(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldClaims), v...))
+	})
+}
+
+// ClaimsNotIn applies the NotIn predicate on the "claims" field.
+func ClaimsNotIn(vs ...string) predicate.Token {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Token(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldClaims), v...))
+	})
+}
+
+// ClaimsGT applies the GT predicate on the "claims" field.
+func ClaimsGT(v string) predicate.Token {
+	return predicate.Token(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldClaims), v))
+	})
+}
+
+// ClaimsGTE applies the GTE predicate on the "claims" field.
+func ClaimsGTE(v string) predicate.Token {
+	return predicate.Token(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldClaims), v))
+	})
+}
+
+// ClaimsLT applies the LT predicate on the "claims" field.
+func ClaimsLT(v string) predicate.Token {
+	return predicate.Token(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldClaims), v))
+	})
+}
+
+// ClaimsLTE applies the LTE predicate on the "claims" field.
+func ClaimsLTE(v string) predicate.Token {
+	return predicate.Token(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldClaims), v))
+	})
+}
+
+// ClaimsContains applies the Contains predicate on the "claims" field.
+func ClaimsContains(v string) predicate.Token {
+	return predicate.Token(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldClaims), v))
+	})
+}
+
+// ClaimsHasPrefix applies the HasPrefix predicate on the "claims" field.
+func ClaimsHasPrefix(v string) predicate.Token {
+	return predicate.Token(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldClaims), v))
+	})
+}
+
+// ClaimsHasSuffix applies the HasSuffix predicate on the "claims" field.
+func ClaimsHasSuffix(v string) predicate.Token {
+	return predicate.Token(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldClaims), v))
+	})
+}
+
+// ClaimsEqualFold applies the EqualFold predicate on the "claims" field.
+func ClaimsEqualFold(v string) predicate.Token {
+	return predicate.Token(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldClaims), v))
+	})
+}
+
+// ClaimsContainsFold applies the ContainsFold predicate on the "claims" field.
+func ClaimsContainsFold(v string) predicate.Token {
+	return predicate.Token(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldClaims), v))
 	})
 }
 

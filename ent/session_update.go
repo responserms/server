@@ -59,15 +59,23 @@ func (su *SessionUpdate) SetDeviceType(s string) *SessionUpdate {
 	return su
 }
 
-// SetClaims sets the claims field.
-func (su *SessionUpdate) SetClaims(s string) *SessionUpdate {
-	su.mutation.SetClaims(s)
-	return su
-}
-
 // SetTerminatedAt sets the terminated_at field.
 func (su *SessionUpdate) SetTerminatedAt(t time.Time) *SessionUpdate {
 	su.mutation.SetTerminatedAt(t)
+	return su
+}
+
+// SetNillableTerminatedAt sets the terminated_at field if the given value is not nil.
+func (su *SessionUpdate) SetNillableTerminatedAt(t *time.Time) *SessionUpdate {
+	if t != nil {
+		su.SetTerminatedAt(*t)
+	}
+	return su
+}
+
+// ClearTerminatedAt clears the value of terminated_at.
+func (su *SessionUpdate) ClearTerminatedAt() *SessionUpdate {
+	su.mutation.ClearTerminatedAt()
 	return su
 }
 
@@ -246,17 +254,16 @@ func (su *SessionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: session.FieldDeviceType,
 		})
 	}
-	if value, ok := su.mutation.Claims(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: session.FieldClaims,
-		})
-	}
 	if value, ok := su.mutation.TerminatedAt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
+			Column: session.FieldTerminatedAt,
+		})
+	}
+	if su.mutation.TerminatedAtCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
 			Column: session.FieldTerminatedAt,
 		})
 	}
@@ -378,15 +385,23 @@ func (suo *SessionUpdateOne) SetDeviceType(s string) *SessionUpdateOne {
 	return suo
 }
 
-// SetClaims sets the claims field.
-func (suo *SessionUpdateOne) SetClaims(s string) *SessionUpdateOne {
-	suo.mutation.SetClaims(s)
-	return suo
-}
-
 // SetTerminatedAt sets the terminated_at field.
 func (suo *SessionUpdateOne) SetTerminatedAt(t time.Time) *SessionUpdateOne {
 	suo.mutation.SetTerminatedAt(t)
+	return suo
+}
+
+// SetNillableTerminatedAt sets the terminated_at field if the given value is not nil.
+func (suo *SessionUpdateOne) SetNillableTerminatedAt(t *time.Time) *SessionUpdateOne {
+	if t != nil {
+		suo.SetTerminatedAt(*t)
+	}
+	return suo
+}
+
+// ClearTerminatedAt clears the value of terminated_at.
+func (suo *SessionUpdateOne) ClearTerminatedAt() *SessionUpdateOne {
+	suo.mutation.ClearTerminatedAt()
 	return suo
 }
 
@@ -563,17 +578,16 @@ func (suo *SessionUpdateOne) sqlSave(ctx context.Context) (_node *Session, err e
 			Column: session.FieldDeviceType,
 		})
 	}
-	if value, ok := suo.mutation.Claims(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: session.FieldClaims,
-		})
-	}
 	if value, ok := suo.mutation.TerminatedAt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
+			Column: session.FieldTerminatedAt,
+		})
+	}
+	if suo.mutation.TerminatedAtCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
 			Column: session.FieldTerminatedAt,
 		})
 	}

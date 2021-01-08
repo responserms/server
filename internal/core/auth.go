@@ -50,9 +50,13 @@ type (
 
 	// TokenFromCredentialsOptions configures the TokenFromCredentials method.
 	TokenFromCredentialsOptions struct {
-		SessionID int
-		Email     string
-		Password  string
+		Email                 string
+		Password              string
+		BrowserName           string
+		BrowserVersion        string
+		DeviceType            string
+		DeviceOperatingSystem string
+		IPAddress             string
 	}
 
 	// TokenFromProviderOptions configures the TokenFromProvider method.
@@ -96,7 +100,14 @@ func (s *authService) TokenFromCredentials(ctx context.Context, opts *TokenFromC
 		return nil, ErrAuthInvalidCredentials
 	}
 
-	session, err := s.core.Sessions.GetSession(ctx, opts.SessionID)
+	session, err := s.core.Sessions.CreateSession(ctx, &CreateSessionOptions{
+		UserID:                user.ID,
+		BrowserName:           opts.BrowserName,
+		BrowserVersion:        opts.BrowserVersion,
+		DeviceType:            opts.DeviceType,
+		DeviceOperatingSystem: opts.DeviceOperatingSystem,
+		IPAddress:             opts.IPAddress,
+	})
 	if err != nil {
 		return nil, fmt.Errorf("Auth.TokenFromCredentials: %w", err)
 	}

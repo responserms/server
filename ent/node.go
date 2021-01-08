@@ -679,7 +679,7 @@ func (s *Session) Node(ctx context.Context) (node *Node, err error) {
 	node = &Node{
 		ID:     s.ID,
 		Type:   "Session",
-		Fields: make([]*Field, 9),
+		Fields: make([]*Field, 8),
 		Edges:  make([]*Edge, 2),
 	}
 	var buf []byte
@@ -739,18 +739,10 @@ func (s *Session) Node(ctx context.Context) (node *Node, err error) {
 		Name:  "device_type",
 		Value: string(buf),
 	}
-	if buf, err = json.Marshal(s.Claims); err != nil {
-		return nil, err
-	}
-	node.Fields[7] = &Field{
-		Type:  "string",
-		Name:  "claims",
-		Value: string(buf),
-	}
 	if buf, err = json.Marshal(s.TerminatedAt); err != nil {
 		return nil, err
 	}
-	node.Fields[8] = &Field{
+	node.Fields[7] = &Field{
 		Type:  "time.Time",
 		Name:  "terminated_at",
 		Value: string(buf),
@@ -782,7 +774,7 @@ func (t *Token) Node(ctx context.Context) (node *Node, err error) {
 	node = &Node{
 		ID:     t.ID,
 		Type:   "Token",
-		Fields: make([]*Field, 2),
+		Fields: make([]*Field, 3),
 		Edges:  make([]*Edge, 1),
 	}
 	var buf []byte
@@ -800,6 +792,14 @@ func (t *Token) Node(ctx context.Context) (node *Node, err error) {
 	node.Fields[1] = &Field{
 		Type:  "time.Time",
 		Name:  "blocked_at",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(t.Claims); err != nil {
+		return nil, err
+	}
+	node.Fields[2] = &Field{
+		Type:  "string",
+		Name:  "claims",
 		Value: string(buf),
 	}
 	node.Edges[0] = &Edge{

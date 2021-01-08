@@ -9,6 +9,7 @@ import (
 	"strconv"
 
 	"github.com/responserms/server/internal/log"
+	"github.com/responserms/server/internal/reqdata"
 	"github.com/responserms/server/internal/services/cluster"
 	"github.com/responserms/server/internal/services/database"
 	"github.com/responserms/server/internal/services/events"
@@ -105,7 +106,10 @@ func (s *Server) Start() error {
 				s.options.BindAddress,
 				strconv.Itoa(s.options.Port),
 			),
-			s.mux,
+
+			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				s.mux.ServeHTTP(w, r.WithContext(reqdata.ContextFromRequest(r)))
+			}),
 		)
 
 		if err != nil {

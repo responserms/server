@@ -11,6 +11,8 @@ const (
 	FieldExpiredAt = "expired_at"
 	// FieldBlockedAt holds the string denoting the blocked_at field in the database.
 	FieldBlockedAt = "blocked_at"
+	// FieldClaims holds the string denoting the claims field in the database.
+	FieldClaims = "claims"
 
 	// EdgeSession holds the string denoting the session edge name in mutations.
 	EdgeSession = "session"
@@ -31,6 +33,7 @@ var Columns = []string{
 	FieldID,
 	FieldExpiredAt,
 	FieldBlockedAt,
+	FieldClaims,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

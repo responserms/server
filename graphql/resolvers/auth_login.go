@@ -11,6 +11,7 @@ import (
 	"github.com/responserms/server/graphql/server"
 	"github.com/responserms/server/graphql/types"
 	"github.com/responserms/server/internal/core"
+	"github.com/responserms/server/internal/reqdata"
 )
 
 func (r *mutationResolver) LoginWithCredentials(ctx context.Context, input types.LoginWithCredentialsInput) (*types.LoginWithCredentialsPayload, error) {
@@ -19,8 +20,13 @@ func (r *mutationResolver) LoginWithCredentials(ctx context.Context, input types
 	}
 
 	token, err := r.core.Auth.TokenFromCredentials(ctx, &core.TokenFromCredentialsOptions{
-		Email:    input.Credentials.Email,
-		Password: input.Credentials.Password,
+		Email:                 input.Credentials.Email,
+		Password:              input.Credentials.Password,
+		BrowserName:           input.Browser.Name,
+		BrowserVersion:        input.Browser.Version,
+		DeviceType:            input.Device.Type,
+		DeviceOperatingSystem: input.Device.OperatingSystem,
+		IPAddress:             reqdata.IPAddressFromContext(ctx),
 	})
 
 	if err != nil {

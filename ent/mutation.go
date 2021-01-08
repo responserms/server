@@ -6287,7 +6287,6 @@ type SessionMutation struct {
 	browser_version *string
 	device_os       *string
 	device_type     *string
-	claims          *string
 	terminated_at   *time.Time
 	clearedFields   map[string]struct{}
 	token           *int
@@ -6637,43 +6636,6 @@ func (m *SessionMutation) ResetDeviceType() {
 	m.device_type = nil
 }
 
-// SetClaims sets the claims field.
-func (m *SessionMutation) SetClaims(s string) {
-	m.claims = &s
-}
-
-// Claims returns the claims value in the mutation.
-func (m *SessionMutation) Claims() (r string, exists bool) {
-	v := m.claims
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldClaims returns the old claims value of the Session.
-// If the Session object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
-func (m *SessionMutation) OldClaims(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldClaims is allowed only on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldClaims requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldClaims: %w", err)
-	}
-	return oldValue.Claims, nil
-}
-
-// ResetClaims reset all changes of the "claims" field.
-func (m *SessionMutation) ResetClaims() {
-	m.claims = nil
-}
-
 // SetTerminatedAt sets the terminated_at field.
 func (m *SessionMutation) SetTerminatedAt(t time.Time) {
 	m.terminated_at = &t
@@ -6692,7 +6654,7 @@ func (m *SessionMutation) TerminatedAt() (r time.Time, exists bool) {
 // If the Session object wasn't provided to the builder, the object is fetched
 // from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
-func (m *SessionMutation) OldTerminatedAt(ctx context.Context) (v time.Time, err error) {
+func (m *SessionMutation) OldTerminatedAt(ctx context.Context) (v *time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, fmt.Errorf("OldTerminatedAt is allowed only on UpdateOne operations")
 	}
@@ -6706,9 +6668,22 @@ func (m *SessionMutation) OldTerminatedAt(ctx context.Context) (v time.Time, err
 	return oldValue.TerminatedAt, nil
 }
 
+// ClearTerminatedAt clears the value of terminated_at.
+func (m *SessionMutation) ClearTerminatedAt() {
+	m.terminated_at = nil
+	m.clearedFields[session.FieldTerminatedAt] = struct{}{}
+}
+
+// TerminatedAtCleared returns if the field terminated_at was cleared in this mutation.
+func (m *SessionMutation) TerminatedAtCleared() bool {
+	_, ok := m.clearedFields[session.FieldTerminatedAt]
+	return ok
+}
+
 // ResetTerminatedAt reset all changes of the "terminated_at" field.
 func (m *SessionMutation) ResetTerminatedAt() {
 	m.terminated_at = nil
+	delete(m.clearedFields, session.FieldTerminatedAt)
 }
 
 // SetTokenID sets the token edge to Token by id.
@@ -6803,7 +6778,7 @@ func (m *SessionMutation) Type() string {
 // this mutation. Note that, in order to get all numeric
 // fields that were in/decremented, call AddedFields().
 func (m *SessionMutation) Fields() []string {
-	fields := make([]string, 0, 9)
+	fields := make([]string, 0, 8)
 	if m.create_time != nil {
 		fields = append(fields, session.FieldCreateTime)
 	}
@@ -6824,9 +6799,6 @@ func (m *SessionMutation) Fields() []string {
 	}
 	if m.device_type != nil {
 		fields = append(fields, session.FieldDeviceType)
-	}
-	if m.claims != nil {
-		fields = append(fields, session.FieldClaims)
 	}
 	if m.terminated_at != nil {
 		fields = append(fields, session.FieldTerminatedAt)
@@ -6853,8 +6825,6 @@ func (m *SessionMutation) Field(name string) (ent.Value, bool) {
 		return m.DeviceOs()
 	case session.FieldDeviceType:
 		return m.DeviceType()
-	case session.FieldClaims:
-		return m.Claims()
 	case session.FieldTerminatedAt:
 		return m.TerminatedAt()
 	}
@@ -6880,8 +6850,6 @@ func (m *SessionMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldDeviceOs(ctx)
 	case session.FieldDeviceType:
 		return m.OldDeviceType(ctx)
-	case session.FieldClaims:
-		return m.OldClaims(ctx)
 	case session.FieldTerminatedAt:
 		return m.OldTerminatedAt(ctx)
 	}
@@ -6942,13 +6910,6 @@ func (m *SessionMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetDeviceType(v)
 		return nil
-	case session.FieldClaims:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetClaims(v)
-		return nil
 	case session.FieldTerminatedAt:
 		v, ok := value.(time.Time)
 		if !ok {
@@ -6985,7 +6946,11 @@ func (m *SessionMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared
 // during this mutation.
 func (m *SessionMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(session.FieldTerminatedAt) {
+		fields = append(fields, session.FieldTerminatedAt)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicates if this field was
@@ -6998,6 +6963,11 @@ func (m *SessionMutation) FieldCleared(name string) bool {
 // ClearField clears the value for the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *SessionMutation) ClearField(name string) error {
+	switch name {
+	case session.FieldTerminatedAt:
+		m.ClearTerminatedAt()
+		return nil
+	}
 	return fmt.Errorf("unknown Session nullable field %s", name)
 }
 
@@ -7026,9 +6996,6 @@ func (m *SessionMutation) ResetField(name string) error {
 		return nil
 	case session.FieldDeviceType:
 		m.ResetDeviceType()
-		return nil
-	case session.FieldClaims:
-		m.ResetClaims()
 		return nil
 	case session.FieldTerminatedAt:
 		m.ResetTerminatedAt()
@@ -7144,6 +7111,7 @@ type TokenMutation struct {
 	id             *int
 	expired_at     *time.Time
 	blocked_at     *time.Time
+	claims         *string
 	clearedFields  map[string]struct{}
 	session        *int
 	clearedsession bool
@@ -7286,7 +7254,7 @@ func (m *TokenMutation) BlockedAt() (r time.Time, exists bool) {
 // If the Token object wasn't provided to the builder, the object is fetched
 // from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
-func (m *TokenMutation) OldBlockedAt(ctx context.Context) (v time.Time, err error) {
+func (m *TokenMutation) OldBlockedAt(ctx context.Context) (v *time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, fmt.Errorf("OldBlockedAt is allowed only on UpdateOne operations")
 	}
@@ -7300,9 +7268,59 @@ func (m *TokenMutation) OldBlockedAt(ctx context.Context) (v time.Time, err erro
 	return oldValue.BlockedAt, nil
 }
 
+// ClearBlockedAt clears the value of blocked_at.
+func (m *TokenMutation) ClearBlockedAt() {
+	m.blocked_at = nil
+	m.clearedFields[token.FieldBlockedAt] = struct{}{}
+}
+
+// BlockedAtCleared returns if the field blocked_at was cleared in this mutation.
+func (m *TokenMutation) BlockedAtCleared() bool {
+	_, ok := m.clearedFields[token.FieldBlockedAt]
+	return ok
+}
+
 // ResetBlockedAt reset all changes of the "blocked_at" field.
 func (m *TokenMutation) ResetBlockedAt() {
 	m.blocked_at = nil
+	delete(m.clearedFields, token.FieldBlockedAt)
+}
+
+// SetClaims sets the claims field.
+func (m *TokenMutation) SetClaims(s string) {
+	m.claims = &s
+}
+
+// Claims returns the claims value in the mutation.
+func (m *TokenMutation) Claims() (r string, exists bool) {
+	v := m.claims
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldClaims returns the old claims value of the Token.
+// If the Token object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *TokenMutation) OldClaims(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldClaims is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldClaims requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldClaims: %w", err)
+	}
+	return oldValue.Claims, nil
+}
+
+// ResetClaims reset all changes of the "claims" field.
+func (m *TokenMutation) ResetClaims() {
+	m.claims = nil
 }
 
 // SetSessionID sets the session edge to Session by id.
@@ -7358,12 +7376,15 @@ func (m *TokenMutation) Type() string {
 // this mutation. Note that, in order to get all numeric
 // fields that were in/decremented, call AddedFields().
 func (m *TokenMutation) Fields() []string {
-	fields := make([]string, 0, 2)
+	fields := make([]string, 0, 3)
 	if m.expired_at != nil {
 		fields = append(fields, token.FieldExpiredAt)
 	}
 	if m.blocked_at != nil {
 		fields = append(fields, token.FieldBlockedAt)
+	}
+	if m.claims != nil {
+		fields = append(fields, token.FieldClaims)
 	}
 	return fields
 }
@@ -7377,6 +7398,8 @@ func (m *TokenMutation) Field(name string) (ent.Value, bool) {
 		return m.ExpiredAt()
 	case token.FieldBlockedAt:
 		return m.BlockedAt()
+	case token.FieldClaims:
+		return m.Claims()
 	}
 	return nil, false
 }
@@ -7390,6 +7413,8 @@ func (m *TokenMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldExpiredAt(ctx)
 	case token.FieldBlockedAt:
 		return m.OldBlockedAt(ctx)
+	case token.FieldClaims:
+		return m.OldClaims(ctx)
 	}
 	return nil, fmt.Errorf("unknown Token field %s", name)
 }
@@ -7412,6 +7437,13 @@ func (m *TokenMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetBlockedAt(v)
+		return nil
+	case token.FieldClaims:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetClaims(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Token field %s", name)
@@ -7442,7 +7474,11 @@ func (m *TokenMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared
 // during this mutation.
 func (m *TokenMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(token.FieldBlockedAt) {
+		fields = append(fields, token.FieldBlockedAt)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicates if this field was
@@ -7455,6 +7491,11 @@ func (m *TokenMutation) FieldCleared(name string) bool {
 // ClearField clears the value for the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *TokenMutation) ClearField(name string) error {
+	switch name {
+	case token.FieldBlockedAt:
+		m.ClearBlockedAt()
+		return nil
+	}
 	return fmt.Errorf("unknown Token nullable field %s", name)
 }
 
@@ -7468,6 +7509,9 @@ func (m *TokenMutation) ResetField(name string) error {
 		return nil
 	case token.FieldBlockedAt:
 		m.ResetBlockedAt()
+		return nil
+	case token.FieldClaims:
+		m.ResetClaims()
 		return nil
 	}
 	return fmt.Errorf("unknown Token field %s", name)

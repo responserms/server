@@ -21,8 +21,9 @@ func (Session) Fields() []ent.Field {
 		field.String("browser_version"),
 		field.String("device_os"),
 		field.String("device_type"),
-		field.Text("claims"),
-		field.Time("terminated_at"),
+		field.Time("terminated_at").
+			Optional().
+			Nillable(),
 	}
 }
 
